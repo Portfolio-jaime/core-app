@@ -1,0 +1,162 @@
+<h2>Modelo de datos — PostgreSQL</h2>
+<p class="subtitle">Sección 2 de 4 — Tablas principales y relaciones</p>
+
+<style>
+.db-wrap { font-size: 12px; font-family: monospace; }
+.tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin: 16px 0; }
+.table { border: 1px solid #334155; border-radius: 8px; overflow: hidden; }
+.table-header { padding: 8px 12px; font-weight: bold; font-size: 13px; letter-spacing: 0.5px; }
+.table-body { padding: 8px 12px; background: #0f172a; }
+.field { display: flex; gap: 8px; padding: 3px 0; border-bottom: 1px solid #1e293b; }
+.field:last-child { border-bottom: none; }
+.fname { color: #e2e8f0; min-width: 140px; }
+.ftype { color: #64748b; }
+.fpk { color: #f59e0b; }
+.ffk { color: #38bdf8; }
+.fnull { color: #4ade80; font-size: 10px; }
+
+/* Table color coding */
+.t-users .table-header { background: rgba(99,102,241,0.15); color: #818cf8; }
+.t-workouts .table-header { background: rgba(56,189,248,0.1); color: #38bdf8; }
+.t-swimming .table-header { background: rgba(56,189,248,0.15); color: #7dd3fc; }
+.t-meals .table-header { background: rgba(74,222,128,0.1); color: #4ade80; }
+.t-habits .table-header { background: rgba(251,191,36,0.1); color: #fbbf24; }
+.t-body .table-header { background: rgba(248,113,113,0.1); color: #f87171; }
+.t-exercises .table-header { background: rgba(192,132,252,0.1); color: #c084fc; }
+
+.relations { margin: 16px 0; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; }
+.rel-title { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.rel-row { color: #64748b; padding: 3px 0; }
+.rel-row span { color: #38bdf8; }
+</style>
+
+<div class="db-wrap">
+  <div class="tables-grid">
+
+    <!-- users -->
+    <div class="table t-users">
+      <div class="table-header">👤 users</div>
+      <div class="table-body">
+        <div class="field"><span class="fname fpk">id</span><span class="ftype">UUID PK</span></div>
+        <div class="field"><span class="fname">name</span><span class="ftype">VARCHAR(100)</span></div>
+        <div class="field"><span class="fname">email</span><span class="ftype">VARCHAR UNIQUE</span></div>
+        <div class="field"><span class="fname">password_hash</span><span class="ftype">TEXT</span></div>
+        <div class="field"><span class="fname">height_cm</span><span class="ftype">INT</span></div>
+        <div class="field"><span class="fname">birth_date</span><span class="ftype">DATE</span></div>
+        <div class="field"><span class="fname">condition_notes</span><span class="ftype">TEXT nullable</span></div>
+        <div class="field"><span class="fname">protein_goal_g</span><span class="ftype">INT default 157</span></div>
+        <div class="field"><span class="fname">water_goal_ml</span><span class="ftype">INT default 2000</span></div>
+        <div class="field"><span class="fname">created_at</span><span class="ftype">TIMESTAMP</span></div>
+      </div>
+    </div>
+
+    <!-- workout_logs -->
+    <div class="table t-workouts">
+      <div class="table-header">🏋️ workout_logs</div>
+      <div class="table-body">
+        <div class="field"><span class="fname fpk">id</span><span class="ftype">UUID PK</span></div>
+        <div class="field"><span class="fname ffk">user_id</span><span class="ftype">UUID FK→users</span></div>
+        <div class="field"><span class="fname">date</span><span class="ftype">DATE</span></div>
+        <div class="field"><span class="fname">type</span><span class="ftype">ENUM(core,strength,swimming,rest)</span></div>
+        <div class="field"><span class="fname">duration_min</span><span class="ftype">INT</span></div>
+        <div class="field"><span class="fname">notes</span><span class="ftype">TEXT nullable</span></div>
+        <div class="field"><span class="fname">completed</span><span class="ftype">BOOLEAN default false</span></div>
+        <div class="field"><span class="fname">created_at</span><span class="ftype">TIMESTAMP</span></div>
+      </div>
+    </div>
+
+    <!-- swimming_sessions -->
+    <div class="table t-swimming">
+      <div class="table-header">🏊 swimming_sessions</div>
+      <div class="table-body">
+        <div class="field"><span class="fname fpk">id</span><span class="ftype">UUID PK</span></div>
+        <div class="field"><span class="fname ffk">user_id</span><span class="ftype">UUID FK→users</span></div>
+        <div class="field"><span class="fname">date</span><span class="ftype">DATE</span></div>
+        <div class="field"><span class="fname">total_laps</span><span class="ftype">INT</span></div>
+        <div class="field"><span class="fname">total_meters</span><span class="ftype">INT</span></div>
+        <div class="field"><span class="fname">duration_min</span><span class="ftype">INT</span></div>
+        <div class="field"><span class="fname">pool_length_m</span><span class="ftype">INT default 25</span></div>
+        <div class="field"><span class="fname">strokes_json</span><span class="ftype">JSONB</span><span style="color:#64748b;font-size:10px">{free,back,kick}</span></div>
+        <div class="field"><span class="fname">avg_hr_bpm</span><span class="ftype">INT nullable</span></div>
+        <div class="field"><span class="fname">notes</span><span class="ftype">TEXT nullable</span></div>
+      </div>
+    </div>
+
+    <!-- meal_logs -->
+    <div class="table t-meals">
+      <div class="table-header">🍳 meal_logs</div>
+      <div class="table-body">
+        <div class="field"><span class="fname fpk">id</span><span class="ftype">UUID PK</span></div>
+        <div class="field"><span class="fname ffk">user_id</span><span class="ftype">UUID FK→users</span></div>
+        <div class="field"><span class="fname">date</span><span class="ftype">DATE</span></div>
+        <div class="field"><span class="fname">meal_type</span><span class="ftype">ENUM(breakfast,snack1,lunch,snack2,dinner)</span></div>
+        <div class="field"><span class="fname">description</span><span class="ftype">TEXT</span></div>
+        <div class="field"><span class="fname">protein_g</span><span class="ftype">DECIMAL(5,1)</span></div>
+        <div class="field"><span class="fname">calories_kcal</span><span class="ftype">INT nullable</span></div>
+        <div class="field"><span class="fname">is_keto</span><span class="ftype">BOOLEAN default false</span></div>
+      </div>
+    </div>
+
+    <!-- habit_logs -->
+    <div class="table t-habits">
+      <div class="table-header">✅ habit_logs</div>
+      <div class="table-body">
+        <div class="field"><span class="fname fpk">id</span><span class="ftype">UUID PK</span></div>
+        <div class="field"><span class="fname ffk">user_id</span><span class="ftype">UUID FK→users</span></div>
+        <div class="field"><span class="fname">date</span><span class="ftype">DATE</span></div>
+        <div class="field"><span class="fname">water_ml</span><span class="ftype">INT default 0</span></div>
+        <div class="field"><span class="fname">meals_with_protein</span><span class="ftype">INT default 0</span></div>
+        <div class="field"><span class="fname">trained</span><span class="ftype">BOOLEAN default false</span></div>
+        <div class="field"><span class="fname">sleep_hours</span><span class="ftype">DECIMAL(3,1) nullable</span></div>
+        <div class="field"><span class="fname">mindfulness</span><span class="ftype">BOOLEAN default false</span></div>
+        <div class="field"><span class="fname">score</span><span class="ftype">INT</span><span style="color:#64748b;font-size:10px">0-100</span></div>
+      </div>
+    </div>
+
+    <!-- body_measurements -->
+    <div class="table t-body">
+      <div class="table-header">📊 body_measurements</div>
+      <div class="table-body">
+        <div class="field"><span class="fname fpk">id</span><span class="ftype">UUID PK</span></div>
+        <div class="field"><span class="fname ffk">user_id</span><span class="ftype">UUID FK→users</span></div>
+        <div class="field"><span class="fname">date</span><span class="ftype">DATE</span></div>
+        <div class="field"><span class="fname">weight_kg</span><span class="ftype">DECIMAL(5,1)</span></div>
+        <div class="field"><span class="fname">waist_cm</span><span class="ftype">DECIMAL(5,1) nullable</span></div>
+        <div class="field"><span class="fname">energy_level</span><span class="ftype">INT</span><span style="color:#64748b;font-size:10px">1-5</span></div>
+        <div class="field"><span class="fname">back_pain_level</span><span class="ftype">INT</span><span style="color:#64748b;font-size:10px">0-10</span></div>
+        <div class="field"><span class="fname">notes</span><span class="ftype">TEXT nullable</span></div>
+      </div>
+    </div>
+
+    <!-- exercises -->
+    <div class="table t-exercises">
+      <div class="table-header">📚 exercises (catálogo)</div>
+      <div class="table-body">
+        <div class="field"><span class="fname fpk">id</span><span class="ftype">UUID PK</span></div>
+        <div class="field"><span class="fname">name</span><span class="ftype">VARCHAR(100)</span></div>
+        <div class="field"><span class="fname">category</span><span class="ftype">ENUM(core,strength,swimming,mobility)</span></div>
+        <div class="field"><span class="fname">description</span><span class="ftype">TEXT</span></div>
+        <div class="field"><span class="fname">instructions</span><span class="ftype">TEXT[]</span></div>
+        <div class="field"><span class="fname">muscles_worked</span><span class="ftype">TEXT[]</span></div>
+        <div class="field"><span class="fname">image_url</span><span class="ftype">TEXT nullable</span></div>
+        <div class="field"><span class="fname">safe_for_l5s1</span><span class="ftype">BOOLEAN default true</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Relations summary -->
+  <div class="relations">
+    <div class="rel-title">Relaciones clave</div>
+    <div class="rel-row">users 1 → N <span>workout_logs</span></div>
+    <div class="rel-row">users 1 → N <span>swimming_sessions</span></div>
+    <div class="rel-row">users 1 → N <span>meal_logs</span></div>
+    <div class="rel-row">users 1 → 1/day <span>habit_logs</span> (unique constraint: user_id + date)</div>
+    <div class="rel-row">users 1 → N <span>body_measurements</span> (weekly)</div>
+    <div class="rel-row"><span>exercises</span> → catálogo global (no FK a users)</div>
+  </div>
+</div>
+
+<div style="margin-top:16px;padding:14px;border:1px solid #334155;border-radius:8px;background:rgba(30,41,59,0.3)">
+  <p style="color:#e2e8f0;font-size:13px;margin:0"><strong>¿Este modelo de datos está bien?</strong> ¿Falta algún campo importante? Responde en el terminal.</p>
+</div>

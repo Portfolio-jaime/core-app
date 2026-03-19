@@ -1,0 +1,187 @@
+<h2>API NestJS + Estructura del proyecto</h2>
+<p class="subtitle">Sección 4 de 4 — Módulos, endpoints y monorepo</p>
+
+<style>
+.api-wrap { font-size: 12px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media(max-width:600px){ .two-col { grid-template-columns: 1fr; } }
+.module { border: 1px solid #334155; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+.mod-header { padding: 7px 12px; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.mod-body { background: #0a0f1a; padding: 10px 12px; }
+.endpoint { display: flex; gap: 8px; padding: 3px 0; border-bottom: 1px solid #1a2535; align-items: center; font-size: 11px; }
+.endpoint:last-child { border-bottom: none; }
+.method { font-size: 10px; padding: 1px 5px; border-radius: 3px; min-width: 38px; text-align: center; font-weight: bold; }
+.get { background: rgba(56,189,248,0.15); color: #38bdf8; }
+.post { background: rgba(74,222,128,0.15); color: #4ade80; }
+.put { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.delete { background: rgba(248,113,113,0.15); color: #f87171; }
+.ep-path { color: #e2e8f0; font-family: monospace; }
+.ep-desc { color: #475569; font-size: 10px; margin-left: auto; }
+
+.tree { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 11px; line-height: 2; }
+.d { color: #38bdf8; }
+.f { color: #94a3b8; }
+.c { color: #475569; }
+
+.m-auth .mod-header { background: rgba(248,113,113,0.15); color: #f87171; }
+.m-users .mod-header { background: rgba(99,102,241,0.15); color: #818cf8; }
+.m-workouts .mod-header { background: rgba(56,189,248,0.15); color: #38bdf8; }
+.m-swimming .mod-header { background: rgba(56,189,248,0.2); color: #7dd3fc; }
+.m-meals .mod-header { background: rgba(74,222,128,0.15); color: #4ade80; }
+.m-habits .mod-header { background: rgba(251,191,36,0.12); color: #fbbf24; }
+.m-body .mod-header { background: rgba(248,113,113,0.1); color: #f87171; }
+.m-exercises .mod-header { background: rgba(192,132,252,0.12); color: #c084fc; }
+</style>
+
+<div class="api-wrap">
+<div class="two-col">
+
+  <!-- LEFT: API Modules -->
+  <div>
+    <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Módulos NestJS — REST API</div>
+
+    <div class="module m-auth">
+      <div class="mod-header">🔐 AuthModule</div>
+      <div class="mod-body">
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/auth/register</span></div>
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/auth/login</span></div>
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/auth/refresh</span></div>
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/auth/logout</span></div>
+      </div>
+    </div>
+
+    <div class="module m-users">
+      <div class="mod-header">👤 UsersModule</div>
+      <div class="mod-body">
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/users/me</span></div>
+        <div class="endpoint"><span class="method put">PUT</span><span class="ep-path">/users/me</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/users/me/stats</span></div>
+      </div>
+    </div>
+
+    <div class="module m-workouts">
+      <div class="mod-header">🏋️ WorkoutsModule</div>
+      <div class="mod-body">
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/workouts</span><span class="ep-desc">?date= &week=</span></div>
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/workouts</span></div>
+        <div class="endpoint"><span class="method put">PUT</span><span class="ep-path">/workouts/:id</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/workouts/plan</span><span class="ep-desc">semana actual</span></div>
+      </div>
+    </div>
+
+    <div class="module m-swimming">
+      <div class="mod-header">🏊 SwimmingModule</div>
+      <div class="mod-body">
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/swimming</span><span class="ep-desc">?month=</span></div>
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/swimming</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/swimming/stats</span><span class="ep-desc">progreso m/sem</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/swimming/plan</span><span class="ep-desc">mes actual</span></div>
+      </div>
+    </div>
+
+    <div class="module m-meals">
+      <div class="mod-header">🍳 MealsModule</div>
+      <div class="mod-body">
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/meals</span><span class="ep-desc">?date=</span></div>
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/meals</span></div>
+        <div class="endpoint"><span class="method put">PUT</span><span class="ep-path">/meals/:id</span></div>
+        <div class="endpoint"><span class="method delete">DEL</span><span class="ep-path">/meals/:id</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/meals/summary</span><span class="ep-desc">proteína del día</span></div>
+      </div>
+    </div>
+
+    <div class="module m-habits">
+      <div class="mod-header">✅ HabitsModule</div>
+      <div class="mod-body">
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/habits</span><span class="ep-desc">?date=</span></div>
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/habits</span></div>
+        <div class="endpoint"><span class="method put">PUT</span><span class="ep-path">/habits/:id</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/habits/weekly</span><span class="ep-desc">scores 7 días</span></div>
+      </div>
+    </div>
+
+    <div class="module m-body">
+      <div class="mod-header">📊 BodyModule</div>
+      <div class="mod-body">
+        <div class="endpoint"><span class="method post">POST</span><span class="ep-path">/body</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/body</span><span class="ep-desc">historial</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/body/trend</span><span class="ep-desc">12 semanas</span></div>
+      </div>
+    </div>
+
+    <div class="module m-exercises">
+      <div class="mod-header">📚 ExercisesModule</div>
+      <div class="mod-body">
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/exercises</span><span class="ep-desc">?category=</span></div>
+        <div class="endpoint"><span class="method get">GET</span><span class="ep-path">/exercises/:id</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Monorepo tree -->
+  <div>
+    <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Estructura del monorepo</div>
+    <div class="tree">
+      <span class="d">healthos/</span><br>
+      ├── <span class="d">apps/</span><br>
+      │   ├── <span class="d">frontend/</span><br>
+      │   │   ├── <span class="d">app/</span> <span class="c"># Next.js App Router</span><br>
+      │   │   │   ├── <span class="d">(auth)/</span><br>
+      │   │   │   ├── <span class="d">dashboard/</span><br>
+      │   │   │   ├── <span class="d">workout/</span><br>
+      │   │   │   ├── <span class="d">swimming/</span><br>
+      │   │   │   ├── <span class="d">nutrition/</span><br>
+      │   │   │   ├── <span class="d">habits/</span><br>
+      │   │   │   ├── <span class="d">body/</span><br>
+      │   │   │   └── <span class="d">library/</span><br>
+      │   │   ├── <span class="d">components/</span><br>
+      │   │   │   ├── <span class="d">ui/</span> <span class="c"># shadcn</span><br>
+      │   │   │   └── <span class="d">charts/</span><br>
+      │   │   └── <span class="f">package.json</span><br>
+      │   └── <span class="d">api/</span><br>
+      │       ├── <span class="d">src/</span><br>
+      │       │   ├── <span class="d">auth/</span><br>
+      │       │   ├── <span class="d">users/</span><br>
+      │       │   ├── <span class="d">workouts/</span><br>
+      │       │   ├── <span class="d">swimming/</span><br>
+      │       │   ├── <span class="d">meals/</span><br>
+      │       │   ├── <span class="d">habits/</span><br>
+      │       │   ├── <span class="d">body/</span><br>
+      │       │   └── <span class="d">exercises/</span><br>
+      │       ├── <span class="d">prisma/</span><br>
+      │       │   └── <span class="f">schema.prisma</span><br>
+      │       └── <span class="f">package.json</span><br>
+      ├── <span class="d">k8s/</span><br>
+      │   ├── <span class="d">base/</span><br>
+      │   │   ├── <span class="f">namespace.yaml</span><br>
+      │   │   ├── <span class="f">frontend-deployment.yaml</span><br>
+      │   │   ├── <span class="f">api-deployment.yaml</span><br>
+      │   │   ├── <span class="f">postgres-statefulset.yaml</span><br>
+      │   │   ├── <span class="f">ingress.yaml</span><br>
+      │   │   └── <span class="f">secrets.yaml</span><br>
+      │   └── <span class="d">argocd/</span><br>
+      │       └── <span class="f">application.yaml</span><br>
+      ├── <span class="d">docker/</span><br>
+      │   ├── <span class="f">frontend.Dockerfile</span><br>
+      │   └── <span class="f">api.Dockerfile</span><br>
+      └── <span class="f">package.json</span> <span class="c"># npm workspaces</span>
+    </div>
+
+    <div style="margin-top:14px;padding:12px;background:#0f172a;border:1px solid #334155;border-radius:8px">
+      <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Stack completo</div>
+      <div style="font-size:11px;line-height:2;color:#94a3b8">
+        <span style="color:#38bdf8">Frontend:</span> Next.js 14 · Tailwind · shadcn/ui · Recharts<br>
+        <span style="color:#4ade80">API:</span> NestJS · Prisma · JWT · class-validator<br>
+        <span style="color:#fbbf24">DB:</span> PostgreSQL 16 · Prisma Migrations<br>
+        <span style="color:#f59e0b">GitOps:</span> ArgoCD · Kind · nginx Ingress<br>
+        <span style="color:#c084fc">Auth:</span> JWT access + refresh tokens<br>
+        <span style="color:#64748b">Package manager:</span> npm workspaces (monorepo)
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div style="margin-top:16px;padding:14px;border:1px solid #334155;border-radius:8px;background:rgba(30,41,59,0.3)">
+  <p style="color:#e2e8f0;font-size:13px;margin:0"><strong>¿Esta estructura y API se ven bien?</strong> Si apruebas, escribo el spec completo y pasamos a la implementación.</p>
+</div>

@@ -1,0 +1,201 @@
+<h2>Pantallas principales — HealthOS</h2>
+<p class="subtitle">Sección 3 de 4 — Layout responsive (mobile + desktop)</p>
+
+<style>
+.screens-wrap { font-size: 12px; }
+.screen-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin: 16px 0; }
+.screen { border: 1px solid #334155; border-radius: 10px; overflow: hidden; }
+.screen-title { padding: 8px 12px; font-weight: bold; font-size: 12px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+.screen-body { background: #0a0f1a; padding: 12px; min-height: 180px; }
+
+/* screen colors */
+.s-dashboard .screen-title { background: rgba(99,102,241,0.2); color: #818cf8; }
+.s-workout .screen-title { background: rgba(56,189,248,0.15); color: #38bdf8; }
+.s-swimming .screen-title { background: rgba(56,189,248,0.2); color: #7dd3fc; }
+.s-nutrition .screen-title { background: rgba(74,222,128,0.15); color: #4ade80; }
+.s-habits .screen-title { background: rgba(251,191,36,0.12); color: #fbbf24; }
+.s-body .screen-title { background: rgba(248,113,113,0.12); color: #f87171; }
+.s-library .screen-title { background: rgba(192,132,252,0.12); color: #c084fc; }
+.s-profile .screen-title { background: rgba(148,163,184,0.12); color: #94a3b8; }
+
+/* Mock UI elements */
+.mock-header { background: #1e293b; border-radius: 4px; padding: 5px 8px; margin-bottom: 8px; font-size: 10px; color: #64748b; display: flex; justify-content: space-between; align-items: center; }
+.stat-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.stat-card { flex: 1; background: #1e293b; border-radius: 4px; padding: 6px 8px; }
+.stat-val { font-size: 14px; font-weight: bold; }
+.stat-lbl { font-size: 9px; color: #64748b; margin-top: 1px; }
+.chart-mock { background: #1e293b; border-radius: 4px; padding: 8px; height: 50px; display: flex; align-items: flex-end; gap: 3px; }
+.bar { background: #6366f1; border-radius: 2px 2px 0 0; width: 18px; }
+.checklist-item { display: flex; gap: 6px; align-items: center; padding: 4px 0; border-bottom: 1px solid #1e293b; font-size: 11px; }
+.check { width: 12px; height: 12px; border-radius: 50%; border: 1px solid #475569; flex-shrink: 0; }
+.check.done { background: #4ade80; border-color: #4ade80; }
+.exercise-item { background: #1e293b; border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+.badge { font-size: 9px; padding: 2px 6px; border-radius: 10px; }
+.b-core { background: rgba(99,102,241,0.2); color: #818cf8; }
+.b-swim { background: rgba(56,189,248,0.2); color: #38bdf8; }
+.b-strength { background: rgba(192,132,252,0.2); color: #c084fc; }
+.lap-row { display: flex; gap: 6px; margin-bottom: 4px; }
+.lap-badge { background: #1e293b; border-radius: 4px; padding: 4px 8px; font-size: 10px; flex: 1; text-align: center; }
+.meal-row { padding: 4px 0; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; font-size: 11px; }
+.meal-lbl { color: #64748b; }
+.protein-bar { background: #1e293b; border-radius: 4px; height: 8px; margin: 8px 0; overflow: hidden; }
+.protein-fill { background: #4ade80; height: 100%; border-radius: 4px; width: 62%; }
+.nav-bar { display: flex; justify-content: space-around; background: #1e293b; border-radius: 4px; padding: 6px; margin-top: 8px; }
+.nav-item { font-size: 9px; color: #64748b; text-align: center; }
+.nav-item.active { color: #6366f1; }
+.weight-chart { display: flex; align-items: flex-end; gap: 4px; height: 40px; padding: 4px; background: #1e293b; border-radius: 4px; }
+.w-bar { width: 14px; border-radius: 2px 2px 0 0; }
+</style>
+
+<div class="screens-wrap">
+<div class="screen-grid">
+
+  <!-- Dashboard -->
+  <div class="screen s-dashboard">
+    <div class="screen-title">📊 Dashboard — Vista general</div>
+    <div class="screen-body">
+      <div class="mock-header"><span>HealthOS</span><span style="color:#4ade80">Semana 3 / 12</span></div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-val" style="color:#f87171">108.2</div><div class="stat-lbl">kg hoy</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:#38bdf8">1.4L</div><div class="stat-lbl">agua</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:#4ade80">98g</div><div class="stat-lbl">proteína</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:#fbbf24">68</div><div class="stat-lbl">score</div></div>
+      </div>
+      <div style="font-size:10px;color:#64748b;margin-bottom:4px">Progreso de peso — 12 semanas</div>
+      <div class="chart-mock">
+        <div class="bar" style="height:80%;background:#6366f1"></div>
+        <div class="bar" style="height:75%;background:#6366f1"></div>
+        <div class="bar" style="height:72%;background:#6366f1"></div>
+        <div class="bar" style="height:68%;background:#38bdf8"></div>
+        <div class="bar" style="height:64%;background:#38bdf8"></div>
+        <div class="bar" style="height:60%;background:#4ade80"></div>
+        <div class="bar" style="height:56%;background:#4ade80;opacity:0.4"></div>
+        <div class="bar" style="height:52%;background:#4ade80;opacity:0.3"></div>
+      </div>
+      <div style="font-size:10px;color:#64748b;margin-top:8px">Entrenamiento hoy: <span style="color:#38bdf8">Natación cardio</span></div>
+    </div>
+  </div>
+
+  <!-- Workout Plan -->
+  <div class="screen s-workout">
+    <div class="screen-title">🏋️ Plan de entrenamiento semanal</div>
+    <div class="screen-body">
+      <div style="font-size:10px;color:#64748b;margin-bottom:6px">Semana 1 — Mes 1 (Adaptación)</div>
+      <div class="exercise-item"><span>🟢 Lunes — Core</span><span class="badge b-core">20 min</span></div>
+      <div class="exercise-item" style="border:1px solid #38bdf855"><span>🔵 Martes — Natación</span><span class="badge b-swim">30 min</span></div>
+      <div class="exercise-item"><span>🟣 Miércoles — Fuerza</span><span class="badge b-strength">25 min</span></div>
+      <div class="exercise-item"><span>🔵 Jueves — Natación</span><span class="badge b-swim">30 min</span></div>
+      <div class="exercise-item"><span>🔵 Viernes — Natación suave</span><span class="badge b-swim">25 min</span></div>
+      <div class="exercise-item"><span>🔵 Sábado — Natación larga</span><span class="badge b-swim">45 min</span></div>
+      <div class="exercise-item" style="opacity:0.4"><span>⚪ Domingo — Descanso</span><span class="badge" style="background:#1e293b;color:#64748b">activo</span></div>
+    </div>
+  </div>
+
+  <!-- Swimming -->
+  <div class="screen s-swimming">
+    <div class="screen-title">🏊 Sesión de natación — Registro</div>
+    <div class="screen-body">
+      <div style="font-size:10px;color:#64748b;margin-bottom:6px">Martes 18 Mar — Piscina 25m</div>
+      <div class="lap-row">
+        <div class="lap-badge"><div style="font-size:14px;font-weight:bold;color:#38bdf8">20</div><div style="color:#64748b">largos</div></div>
+        <div class="lap-badge"><div style="font-size:14px;font-weight:bold;color:#4ade80">500m</div><div style="color:#64748b">total</div></div>
+        <div class="lap-badge"><div style="font-size:14px;font-weight:bold;color:#fbbf24">32min</div><div style="color:#64748b">duración</div></div>
+        <div class="lap-badge"><div style="font-size:14px;font-weight:bold;color:#f87171">114</div><div style="color:#64748b">bpm avg</div></div>
+      </div>
+      <div style="font-size:10px;color:#64748b;margin:6px 0 3px">Desglose por estilo</div>
+      <div class="exercise-item"><span>Libre (crawl)</span><span style="color:#38bdf8">8 largos · 200m</span></div>
+      <div class="exercise-item"><span>Espalda</span><span style="color:#7dd3fc">4 largos · 100m</span></div>
+      <div class="exercise-item"><span>Patada con tabla</span><span style="color:#4ade80">4 largos · 100m</span></div>
+      <div class="exercise-item"><span>Calentamiento</span><span style="color:#64748b">4 largos · 100m</span></div>
+    </div>
+  </div>
+
+  <!-- Nutrition -->
+  <div class="screen s-nutrition">
+    <div class="screen-title">🍳 Nutrición — Log diario</div>
+    <div class="screen-body">
+      <div style="font-size:10px;color:#64748b;margin-bottom:4px">Proteína del día</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:#4ade80">98g / <span style="color:#64748b">157g meta</span></span><span style="color:#64748b">62%</span></div>
+      <div class="protein-bar"><div class="protein-fill"></div></div>
+      <div class="meal-row"><span class="meal-lbl">Desayuno</span><span>3 huevos + aguacate · 35g</span></div>
+      <div class="meal-row"><span class="meal-lbl">Snack AM</span><span>Yogurt griego + nueces · 20g</span></div>
+      <div class="meal-row"><span class="meal-lbl">Almuerzo</span><span>Pollo + arroz + ensalada · 43g</span></div>
+      <div class="meal-row" style="opacity:0.4"><span class="meal-lbl">Snack PM</span><span>— pendiente</span></div>
+      <div class="meal-row" style="opacity:0.4"><span class="meal-lbl">Cena</span><span>Keto — pendiente</span></div>
+      <div style="font-size:10px;color:#38bdf8;margin-top:6px">💧 Agua: 1400ml / 2000ml</div>
+    </div>
+  </div>
+
+  <!-- Habits -->
+  <div class="screen s-habits">
+    <div class="screen-title">✅ Hábitos — Checklist diario</div>
+    <div class="screen-body">
+      <div style="font-size:10px;color:#64748b;margin-bottom:6px">Score del día: <span style="color:#fbbf24;font-weight:bold">68 / 100</span></div>
+      <div class="checklist-item"><div class="check done"></div><span>2L de agua (+10 pts)</span></div>
+      <div class="checklist-item"><div class="check done"></div><span>4 comidas con proteína (+15 pts)</span></div>
+      <div class="checklist-item"><div class="check done"></div><span>Entrenamiento completado (+15 pts)</span></div>
+      <div class="checklist-item"><div class="check done"></div><span>Carbos reducidos en cena (+20 pts)</span></div>
+      <div class="checklist-item"><div class="check"></div><span style="color:#64748b">Dormir 7h (+15 pts)</span></div>
+      <div class="checklist-item"><div class="check"></div><span style="color:#64748b">Mindfulness / pausa (+15 pts)</span></div>
+    </div>
+  </div>
+
+  <!-- Body Tracking -->
+  <div class="screen s-body">
+    <div class="screen-title">📈 Seguimiento corporal</div>
+    <div class="screen-body">
+      <div style="font-size:10px;color:#64748b;margin-bottom:6px">Evolución — 4 semanas</div>
+      <div class="weight-chart">
+        <div class="w-bar" style="height:100%;background:#f87171;opacity:0.7"></div>
+        <div class="w-bar" style="height:95%;background:#f87171;opacity:0.8"></div>
+        <div class="w-bar" style="height:90%;background:#fb923c;opacity:0.9"></div>
+        <div class="w-bar" style="height:85%;background:#4ade80"></div>
+      </div>
+      <div class="stat-row" style="margin-top:8px">
+        <div class="stat-card"><div class="stat-val" style="color:#f87171;font-size:12px">110 → 108.2</div><div class="stat-lbl">kg (−1.8)</div></div>
+        <div class="stat-card"><div class="stat-val" style="color:#4ade80;font-size:12px">−1cm</div><div class="stat-lbl">cintura</div></div>
+      </div>
+      <div style="font-size:10px;margin-top:6px">Dolor lumbar: <span style="color:#4ade80">4 / 10</span> → <span style="color:#38bdf8">2 / 10</span></div>
+      <div style="font-size:10px;margin-top:3px">Energía: ⭐⭐⭐⭐☆</div>
+    </div>
+  </div>
+
+  <!-- Exercise Library -->
+  <div class="screen s-library">
+    <div class="screen-title">📚 Biblioteca de ejercicios</div>
+    <div class="screen-body">
+      <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap">
+        <span class="badge b-core" style="padding:3px 8px">Core</span>
+        <span class="badge b-strength" style="padding:3px 8px">Fuerza</span>
+        <span class="badge b-swim" style="padding:3px 8px">Natación</span>
+        <span class="badge" style="background:rgba(74,222,128,0.15);color:#4ade80;padding:3px 8px">Movilidad</span>
+      </div>
+      <div class="exercise-item"><span>🦅 Bird Dog</span><span class="badge b-core">L5-S1 ✓</span></div>
+      <div class="exercise-item"><span>🐛 Dead Bug</span><span class="badge b-core">L5-S1 ✓</span></div>
+      <div class="exercise-item"><span>🍑 Glute Bridge</span><span class="badge b-core">L5-S1 ✓</span></div>
+      <div class="exercise-item"><span>🏋 Hip Thrust</span><span class="badge b-strength">L5-S1 ✓</span></div>
+      <div class="exercise-item"><span>🎯 Face Pull</span><span class="badge b-strength">L5-S1 ✓</span></div>
+      <div style="font-size:10px;color:#64748b;margin-top:4px">→ Toca para ver instrucciones + imagen</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom Nav (mobile) -->
+<div style="margin-top:8px;padding:14px;background:#0f172a;border:1px solid #334155;border-radius:8px">
+  <div style="font-size:10px;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Navegación (mobile bottom nav / desktop sidebar)</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <span style="padding:4px 10px;background:#6366f1;border-radius:10px;font-size:10px">📊 Dashboard</span>
+    <span style="padding:4px 10px;background:#1e293b;border-radius:10px;font-size:10px;color:#64748b">🏋️ Training</span>
+    <span style="padding:4px 10px;background:#1e293b;border-radius:10px;font-size:10px;color:#64748b">🏊 Swimming</span>
+    <span style="padding:4px 10px;background:#1e293b;border-radius:10px;font-size:10px;color:#64748b">🍳 Nutrition</span>
+    <span style="padding:4px 10px;background:#1e293b;border-radius:10px;font-size:10px;color:#64748b">✅ Habits</span>
+    <span style="padding:4px 10px;background:#1e293b;border-radius:10px;font-size:10px;color:#64748b">📈 Body</span>
+    <span style="padding:4px 10px;background:#1e293b;border-radius:10px;font-size:10px;color:#64748b">📚 Library</span>
+  </div>
+</div>
+</div>
+
+<div style="margin-top:16px;padding:14px;border:1px solid #334155;border-radius:8px;background:rgba(30,41,59,0.3)">
+  <p style="color:#e2e8f0;font-size:13px;margin:0"><strong>¿Estas 7 pantallas cubren lo que necesitas?</strong> ¿Falta alguna? Responde en el terminal.</p>
+</div>

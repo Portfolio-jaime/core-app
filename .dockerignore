@@ -1,0 +1,16 @@
+.next
+node_modules
+npm-debug.log*
+.DS_Store
+*.env*.local
+.git
+.gitignore
+README.md
+TESTING.md
+Dockerfile
+docker-compose.yml
+k8s/
+scripts/
+.superpowers
+coverage
+.nyc_output

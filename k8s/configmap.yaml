@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: health-os-config
+  namespace: health-os
+data:
+  NODE_ENV: "production"
+  PORT: "3001"
+  HOSTNAME: "0.0.0.0"

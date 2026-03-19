@@ -1,0 +1,138 @@
+<h2>Arquitectura — HealthOS en Kind</h2>
+<p class="subtitle">Sección 1 de 4 — ¿Esta arquitectura se ve correcta?</p>
+
+<style>
+.arch-wrap { font-family: monospace; font-size: 13px; }
+.cluster { border: 2px dashed #6366f1; border-radius: 12px; padding: 20px; margin: 16px 0; background: rgba(99,102,241,0.05); }
+.cluster-title { color: #6366f1; font-weight: bold; font-size: 14px; margin-bottom: 14px; letter-spacing: 1px; }
+.namespace { border: 1px solid #334155; border-radius: 8px; padding: 14px; margin: 8px 0; background: rgba(30,41,59,0.5); }
+.ns-title { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.pods-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.pod { border: 1px solid #475569; border-radius: 6px; padding: 10px 14px; background: #1e293b; min-width: 130px; }
+.pod-name { color: #38bdf8; font-weight: bold; font-size: 13px; }
+.pod-tech { color: #94a3b8; font-size: 11px; margin-top: 3px; }
+.pod-port { color: #fb923c; font-size: 11px; margin-top: 2px; }
+.pod-image { color: #4ade80; font-size: 11px; margin-top: 2px; }
+.arrow { color: #64748b; font-size: 18px; align-self: center; }
+.flow-row { display: flex; align-items: center; gap: 8px; margin: 10px 0; flex-wrap: wrap; }
+.ext-box { border: 1px solid #64748b; border-radius: 6px; padding: 8px 14px; background: #0f172a; }
+.ext-title { color: #e2e8f0; font-size: 12px; font-weight: bold; }
+.ext-sub { color: #64748b; font-size: 10px; }
+.argocd { border: 1px solid #f59e0b; border-radius: 6px; padding: 10px 14px; background: rgba(245,158,11,0.08); }
+.argocd-title { color: #f59e0b; font-weight: bold; font-size: 13px; }
+.section-label { color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 6px 0; }
+.pvc { border: 1px dashed #4ade80; border-radius: 6px; padding: 8px 12px; background: rgba(74,222,128,0.05); }
+.pvc-title { color: #4ade80; font-size: 12px; }
+.ingress { border: 1px solid #c084fc; border-radius: 6px; padding: 8px 12px; background: rgba(192,132,252,0.08); }
+.ingress-title { color: #c084fc; font-size: 12px; font-weight: bold; }
+.legend-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 16px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+</style>
+
+<div class="arch-wrap">
+  <!-- Git + ArgoCD Layer -->
+  <div class="section-label">GitOps Layer</div>
+  <div class="flow-row">
+    <div class="ext-box">
+      <div class="ext-title">GitHub Repo</div>
+      <div class="ext-sub">monorepo + k8s manifests</div>
+    </div>
+    <div class="arrow">→ push →</div>
+    <div class="argocd">
+      <div class="argocd-title">⚙ ArgoCD</div>
+      <div class="ext-sub" style="color:#94a3b8">watch & sync</div>
+    </div>
+    <div class="arrow">→ apply →</div>
+    <div class="ext-box">
+      <div class="ext-title">Kind Cluster</div>
+      <div class="ext-sub">local Kubernetes</div>
+    </div>
+  </div>
+
+  <!-- Kind Cluster -->
+  <div class="cluster">
+    <div class="cluster-title">☸ KIND CLUSTER — healthos</div>
+
+    <!-- Ingress -->
+    <div class="section-label">Ingress</div>
+    <div class="ingress" style="margin-bottom:10px">
+      <div class="ingress-title">nginx Ingress Controller</div>
+      <div style="color:#94a3b8;font-size:11px">healthos.local → frontend-svc:3000 &nbsp;|&nbsp; api.healthos.local → api-svc:4000</div>
+    </div>
+
+    <!-- Namespace healthos -->
+    <div class="namespace">
+      <div class="ns-title">namespace: healthos</div>
+      <div class="pods-row">
+        <div class="pod">
+          <div class="pod-name">frontend</div>
+          <div class="pod-tech">Next.js 14</div>
+          <div class="pod-tech">Tailwind + shadcn</div>
+          <div class="pod-port">port: 3000</div>
+          <div class="pod-image">image: healthos/frontend</div>
+        </div>
+        <div class="arrow">→ HTTP →</div>
+        <div class="pod">
+          <div class="pod-name">api</div>
+          <div class="pod-tech">NestJS (TypeScript)</div>
+          <div class="pod-tech">REST + JWT Auth</div>
+          <div class="pod-port">port: 4000</div>
+          <div class="pod-image">image: healthos/api</div>
+        </div>
+        <div class="arrow">→ Prisma →</div>
+        <div class="pod">
+          <div class="pod-name">db</div>
+          <div class="pod-tech">PostgreSQL 16</div>
+          <div class="pod-tech">PVC persistente</div>
+          <div class="pod-port">port: 5432</div>
+          <div class="pod-image">image: postgres:16</div>
+        </div>
+        <div>
+          <div class="pvc" style="margin-top:6px">
+            <div class="pvc-title">💾 PVC: postgres-data</div>
+            <div style="color:#64748b;font-size:10px">5Gi — datos persisten</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Namespace argocd -->
+    <div class="namespace" style="margin-top:10px">
+      <div class="ns-title">namespace: argocd</div>
+      <div class="pods-row">
+        <div class="argocd" style="padding:8px 12px">
+          <div class="argocd-title">ArgoCD Server</div>
+          <div style="color:#94a3b8;font-size:11px">UI + API + sync controller</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monorepo structure -->
+  <div class="section-label">Estructura del monorepo</div>
+  <div style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:14px;font-size:12px;color:#94a3b8;line-height:1.8">
+    <span style="color:#38bdf8">healthos/</span><br>
+    &nbsp;&nbsp;<span style="color:#4ade80">apps/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;frontend/ &nbsp;<span style="color:#64748b"># Next.js 14</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;api/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748b"># NestJS</span><br>
+    &nbsp;&nbsp;<span style="color:#4ade80">k8s/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;base/ &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748b"># Deployments, Services, Ingress</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;argocd/ &nbsp;&nbsp;<span style="color:#64748b"># Application CRDs</span><br>
+    &nbsp;&nbsp;<span style="color:#4ade80">docker/</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;frontend.Dockerfile<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;api.Dockerfile<br>
+    &nbsp;&nbsp;<span style="color:#f59e0b">package.json</span> &nbsp;<span style="color:#64748b"># npm workspaces</span>
+  </div>
+</div>
+
+<div class="legend-row">
+  <div class="legend-item"><div class="dot" style="background:#38bdf8"></div> Pod</div>
+  <div class="legend-item"><div class="dot" style="background:#4ade80"></div> Almacenamiento</div>
+  <div class="legend-item"><div class="dot" style="background:#c084fc"></div> Ingress</div>
+  <div class="legend-item"><div class="dot" style="background:#f59e0b"></div> ArgoCD</div>
+</div>
+
+<div style="margin-top:20px;padding:14px;border:1px solid #334155;border-radius:8px;background:rgba(30,41,59,0.3)">
+  <p style="color:#e2e8f0;font-size:13px;margin:0"><strong>¿Esta arquitectura se ve correcta?</strong> Responde en el terminal con Sí, o dime qué cambiarías.</p>
+</div>
