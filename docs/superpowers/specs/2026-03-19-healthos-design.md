@@ -127,16 +127,19 @@ healthos/
 ```sql
 -- Usuarios
 users (
-  id              UUID PK,
-  name            VARCHAR(100),
-  email           VARCHAR UNIQUE,
-  password_hash   TEXT,
-  height_cm       INT,
-  birth_date      DATE,
-  condition_notes TEXT,          -- "Espondilolistesis L5-S1"
-  protein_goal_g  INT DEFAULT 157,
-  water_goal_ml   INT DEFAULT 2000,
-  created_at      TIMESTAMP
+  id                UUID PK,
+  name              VARCHAR(100),
+  email             VARCHAR UNIQUE,
+  password_hash     TEXT,
+  height_cm         INT,
+  birth_date        DATE,
+  condition_notes   TEXT,          -- "Espondilolistesis L5-S1"
+  protein_goal_g    INT DEFAULT 157,
+  water_goal_ml     INT DEFAULT 2000,
+  weight_goal_kg    DECIMAL(5,1) DEFAULT 95.0,  -- meta fija del programa
+  program_start_date DATE,         -- fecha de inicio del ciclo de 12 semanas, para calcular currentWeek
+  refresh_token_hash TEXT,         -- hash del refresh token activo; NULL cuando logged out
+  created_at        TIMESTAMP
 )
 
 -- Entrenamientos diarios
@@ -144,7 +147,8 @@ workout_logs (
   id           UUID PK,
   user_id      UUID FK→users,
   date         DATE,
-  type         ENUM(core, strength, swimming, rest),
+  type         ENUM(core, strength, swimming_technique, swimming_cardio, swimming_easy, swimming_long, rest),
+  -- mismo ENUM que workout_plans.activity_type para permitir cross-reference
   duration_min INT,
   notes        TEXT,
   completed    BOOLEAN DEFAULT false,
@@ -182,12 +186,14 @@ habit_logs (
   id                  UUID PK,
   user_id             UUID FK→users,
   date                DATE,
-  water_ml            INT DEFAULT 0,
-  meals_with_protein  INT DEFAULT 0,
-  trained             BOOLEAN DEFAULT false,
-  sleep_hours         DECIMAL(3,1),
-  mindfulness         BOOLEAN DEFAULT false,
-  score               INT,  -- 0–100 calculado
+  water_ml            INT DEFAULT 0,         -- +10 pts si >= water_goal_ml
+  meals_with_protein  INT DEFAULT 0,         -- +15 pts si >= 4. AUTO-COMPUTED: el API recalcula este campo en cada CREATE/UPDATE/DELETE de meal_logs del mismo día. Una comida cuenta como "con proteína" si meal_logs.protein_g >= 15. El cliente nunca lo envía directamente.
+  trained             BOOLEAN DEFAULT false,  -- +15 pts
+  low_carb_dinner     BOOLEAN DEFAULT false,  -- +20 pts (cenas sin carbos)
+  sleep_hours         DECIMAL(3,1),           -- +15 pts si >= 7
+  mindfulness         BOOLEAN DEFAULT false,  -- +15 pts
+  supplementation     BOOLEAN DEFAULT false,  -- +10 pts
+  score               INT,  -- 0–100 calculado server-side (ver fórmula en §6 HabitsModule)
   UNIQUE(user_id, date)
 )
 
@@ -214,6 +220,19 @@ exercises (
   image_url      TEXT,
   safe_for_l5s1  BOOLEAN DEFAULT true
 )
+
+-- Plan de 12 semanas (datos semilla, global — mismo plan para todos los usuarios)
+-- Soporta GET /workouts/plan y GET /swimming/plan
+workout_plans (
+  id            UUID PK,
+  week_number   INT,              -- 1–12
+  day_of_week   ENUM(monday, tuesday, wednesday, thursday, friday, saturday, sunday),
+  activity_type ENUM(core, strength, swimming_technique, swimming_cardio, swimming_easy, swimming_long, rest),
+  duration_min  INT,
+  description   TEXT,             -- descripción de la sesión (ej. "4 largos calentamiento + 8 libre")
+  month_phase   ENUM(adaptation, fat_loss, resistance),  -- mes 1/2/3
+  target_meters INT               -- solo para sesiones de natación, NULL para core/fuerza
+)
 ```
 
 ### 5.2 Relaciones clave
@@ -224,6 +243,11 @@ exercises (
 - `users` 1→1/día `habit_logs` (unique constraint user_id + date)
 - `users` 1→N `body_measurements`
 - `exercises` — catálogo global sin FK a users
+- `workout_plans` — catálogo global de 12 semanas sin FK a users (datos semilla)
+
+### 5.3 Regla de autorización
+
+Todos los endpoints (excepto `GET /exercises` y `GET /exercises/:id`) requieren JWT válido. Cada query incluye implícitamente `WHERE user_id = req.user.id` — un usuario nunca puede leer ni escribir datos de otro usuario. `workout_plans` y `exercises` son catálogos globales de solo lectura.
 
 ---
 
@@ -233,16 +257,49 @@ exercises (
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | /auth/register | Registro de usuario |
-| POST | /auth/login | Login, retorna JWT |
-| POST | /auth/refresh | Renovar access token |
+| POST | /auth/login | Login, retorna `{ accessToken, refreshToken }` |
+| POST | /auth/refresh | Renovar access token con refreshToken válido |
 | POST | /auth/logout | Invalidar refresh token |
+
+**Almacenamiento de refresh tokens:** columna `refresh_token_hash TEXT` en la tabla `users`. En logout se pone a NULL. En cada `/auth/refresh` se verifica hash y se rota (se genera nuevo y se actualiza la columna).
 
 ### UsersModule — `/users`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | /users/me | Perfil del usuario autenticado |
 | PUT | /users/me | Actualizar perfil y metas |
-| GET | /users/me/stats | Stats generales del dashboard |
+| GET | /users/me/stats | Datos agregados para el Dashboard |
+
+**`GET /users/me/stats` response shape:**
+```json
+{
+  "latestWeight": 108.2,           // body_measurements más reciente (o null)
+  "weightGoalKg": 95.0,            // users.weight_goal_kg (hardcoded en perfil)
+  "todayWaterMl": 1400,            // habit_logs de hoy (o 0)
+  "waterGoalMl": 2000,
+  "todayProteinG": 98.5,           // suma meal_logs.protein_g de hoy
+  "proteinGoalG": 157,
+  "todayScore": 68,                // habit_logs.score de hoy (o 0)
+  "weeklyScores": [55, 68, 72, 60, 80, 45, 68],  // últimos 7 días, null para días sin log
+  "todayWorkout": {                // workout_plans para hoy según program_start_date + currentWeek
+    "type": "swimming_cardio",
+    "description": "4 calentamiento + 10 libre + 6 espalda",
+    "durationMin": 35
+  },
+  "weekMeters": 1350,              // suma swimming_sessions.total_meters de la semana ISO
+  "currentWeek": 3,                // FLOOR((today - program_start_date) / 7) + 1, capped a 12. NULL si program_start_date es NULL.
+  "currentPhase": "adaptation"     // semanas 1–4: adaptation, 5–8: fat_loss, 9–12: resistance. NULL si currentWeek es NULL.
+}
+```
+**Estado sin program_start_date (usuario recién registrado):** `currentWeek`, `currentPhase` y `todayWorkout` se retornan como `null`. El frontend muestra un CTA para que el usuario establezca su fecha de inicio del programa en `/users/me`.
+
+**Contratos de query params (todos los módulos):**
+- `?date=` → ISO 8601 `YYYY-MM-DD`
+- `?week=` → número de semana del programa, 1–12
+- `?month=` → `YYYY-MM`
+
+**Comportamiento GET /habits?date= cuando no existe log:**
+Retorna `null` (HTTP 200). El frontend crea el log en el primer checklist marcado.
 
 ### WorkoutsModule — `/workouts`
 | Method | Endpoint | Description |
@@ -264,18 +321,30 @@ exercises (
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | /meals | Lista `?date=` |
-| POST | /meals | Registrar comida |
-| PUT | /meals/:id | Actualizar comida |
-| DELETE | /meals/:id | Eliminar comida |
+| POST | /meals | Registrar comida. Después de insertar, recalcular `habit_logs.meals_with_protein` del día. |
+| PUT | /meals/:id | Actualizar comida. Después de actualizar, recalcular `habit_logs.meals_with_protein` del día. |
+| DELETE | /meals/:id | Eliminar comida. Después de eliminar, recalcular `habit_logs.meals_with_protein` del día (evita datos inconsistentes). |
 | GET | /meals/summary | Proteína y calorías del día |
 
 ### HabitsModule — `/habits`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | /habits | Log `?date=` |
-| POST | /habits | Crear log diario |
-| PUT | /habits/:id | Actualizar (checklist) |
+| POST | /habits | Upsert del log del día (crea si no existe, actualiza si ya existe — usa UNIQUE user_id+date). Nunca retorna 409. El servidor calcula y persiste `score` automáticamente en cada POST/PUT. |
+| PUT | /habits/:id | Actualizar campo individual (checklist). El servidor recalcula `score` y lo persiste antes de responder. |
 | GET | /habits/weekly | Scores de los últimos 7 días |
+
+**Fórmula de score (server-side):**
+```
+score = (water_ml >= user.water_goal_ml ? 10 : 0)
+      + (meals_with_protein >= 4 ? 15 : 0)
+      + (trained ? 15 : 0)
+      + (low_carb_dinner ? 20 : 0)
+      + (sleep_hours >= 7 ? 15 : 0)
+      + (mindfulness ? 15 : 0)
+      + (supplementation ? 10 : 0)
+```
+El cliente nunca envía `score` — siempre lo calcula el API.
 
 ### BodyModule — `/body`
 | Method | Endpoint | Description |
@@ -305,8 +374,10 @@ exercises (
 | Biblioteca | `/library` | Catálogo de ejercicios por categoría con badge L5-S1 |
 
 ### Navegación
-- **Mobile:** Bottom navigation bar (5 tabs principales)
-- **Desktop:** Sidebar izquierdo con todos los módulos
+- **Mobile:** Bottom navigation bar con 5 tabs: Dashboard (`/dashboard`) · Entrenamiento (`/workout`) · Natación (`/swimming`) · Hábitos (`/habits`) · Progreso (`/body`). Nutrición (`/nutrition`) y Biblioteca (`/library`) accesibles desde el menú dentro de Entrenamiento (hamburger o tab "Más").
+- **Desktop:** Sidebar izquierdo con todos los 7 módulos visibles.
+
+`weeklyScores` en `/users/me/stats` = últimos 7 días calendario rolling desde hoy hacia atrás (no semana ISO).
 
 ---
 
