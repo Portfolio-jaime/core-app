@@ -5,3 +5,7 @@ node_modules/
 .next/
 *.log
 .worktrees/
+apps/frontend/.next/
+apps/frontend/node_modules/
+apps/api/dist/
+apps/api/node_modules/

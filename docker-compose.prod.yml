@@ -1,0 +1,30 @@
+# ─── PROD: build standalone image and run locally ────────────────────────────
+# Usage:
+#   Build + run:   docker compose -f docker-compose.prod.yml up --build
+#   Run only:      docker compose -f docker-compose.prod.yml up
+#   Push to Hub:   make push   (or: docker compose -f docker-compose.prod.yml build && docker push jaimehenao8126/healthos-frontend:latest)
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+    image: jaimehenao8126/healthos-frontend:latest
+    container_name: healthos-frontend-prod
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

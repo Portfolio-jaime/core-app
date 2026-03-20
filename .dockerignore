@@ -1,16 +1,30 @@
+# Dependencies (re-installed inside Docker) — ** matches any depth
+**/node_modules
+
+# Next.js build output (built inside Docker)
 .next
-node_modules
+apps/frontend/.next
+
+# Env files — never bake secrets into images
+.env
+.env.*
+!.env.example
+
+# Dev / local artifacts
 npm-debug.log*
+*.log
 .DS_Store
-*.env*.local
+coverage
+.nyc_output
+
+# Git
 .git
 .gitignore
+
+# Docs / scripts not needed in image
 README.md
 TESTING.md
-Dockerfile
-docker-compose.yml
+docs/
 k8s/
 scripts/
 .superpowers
-coverage
-.nyc_output
