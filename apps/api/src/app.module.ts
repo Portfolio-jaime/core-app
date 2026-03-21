@@ -11,12 +11,14 @@ import { MealsModule } from './meals/meals.module';
 import { HabitsModule } from './habits/habits.module';
 import { BodyModule } from './body/body.module';
 import { ExercisesModule } from './exercises/exercises.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AuthModule,
+    UsersModule,
     WorkoutsModule,
     SwimmingModule,
     MealsModule,

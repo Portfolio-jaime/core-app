@@ -5,9 +5,11 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ExercisesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(category?: string) {
+  async findAll(muscleGroup?: string) {
     return this.prisma.exercise.findMany({
-      where: category ? { category: category as any } : undefined,
+      where: muscleGroup
+        ? { musclesWorked: { has: muscleGroup } }
+        : undefined,
       orderBy: { name: 'asc' },
     });
   }

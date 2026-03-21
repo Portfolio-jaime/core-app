@@ -6,8 +6,8 @@ export class ExercisesController {
   constructor(private exercisesService: ExercisesService) {}
 
   @Get()
-  findAll(@Query('category') category?: string) {
-    return this.exercisesService.findAll(category);
+  findAll(@Query('muscle') muscle?: string) {
+    return this.exercisesService.findAll(muscle);
   }
 
   @Get(':id')
