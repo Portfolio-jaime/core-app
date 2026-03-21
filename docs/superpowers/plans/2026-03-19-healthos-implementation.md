@@ -101,7 +101,7 @@ Done. Added `apps/frontend/.next/`, `apps/frontend/node_modules/`, `apps/api/dis
 
 `npm install` succeeded. `next build` inside Docker produced HTTP 200.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -115,7 +115,7 @@ git commit -m "chore: restructure to monorepo (npm workspaces)"
 **Files:**
 - Create: `apps/api/` (scaffolded with NestJS CLI)
 
-- [ ] **Step 1: Install NestJS CLI globally and scaffold**
+- [x] **Step 1: Install NestJS CLI globally and scaffold**
 
 ```bash
 npm install -g @nestjs/cli
@@ -124,7 +124,7 @@ nest new . --package-manager npm --skip-git
 ```
 When prompted for package manager: npm
 
-- [ ] **Step 2: Install required dependencies**
+- [x] **Step 2: Install required dependencies**
 
 ```bash
 cd apps/api
@@ -137,14 +137,14 @@ npm install --save-dev @types/passport-jwt @types/bcrypt \
   @nestjs/testing supertest @types/supertest
 ```
 
-- [ ] **Step 3: Verify NestJS starts**
+- [x] **Step 3: Verify NestJS starts**
 
 ```bash
 cd apps/api && npm run start:dev
 ```
 Expected: NestJS starts on port 3000 (we'll change to 4000 next)
 
-- [ ] **Step 4: Update apps/api/src/main.ts to use port 4000**
+- [x] **Step 4: Update apps/api/src/main.ts to use port 4000**
 
 ```typescript
 // apps/api/src/main.ts
@@ -161,14 +161,14 @@ async function bootstrap() {
 bootstrap();
 ```
 
-- [ ] **Step 5: Run the default test to confirm Jest is configured**
+- [x] **Step 5: Run the default test to confirm Jest is configured**
 
 ```bash
 cd apps/api && npm test
 ```
 Expected: PASS — `AppController (e2e)` default test passes
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/api/
@@ -569,7 +569,7 @@ git commit -m "feat(infra): full k8s manifests + ArgoCD application"
 - Create: `apps/api/prisma/schema.prisma`
 - Create: `apps/api/.env`
 
-- [ ] **Step 1: Create .env for local development**
+- [x] **Step 1: Create .env for local development**
 
 ```bash
 # apps/api/.env (never commit)
@@ -584,7 +584,7 @@ FRONTEND_URL="http://localhost:3001"
 EOF
 ```
 
-- [ ] **Step 2: Write schema.prisma (matches spec §5.1 exactly)**
+- [x] **Step 2: Write schema.prisma (matches spec §5.1 exactly)**
 
 ```prisma
 // apps/api/prisma/schema.prisma
@@ -764,7 +764,7 @@ model WorkoutPlan {
 }
 ```
 
-- [ ] **Step 3: Run migration**
+- [x] **Step 3: Run migration**
 
 ```bash
 cd apps/api
@@ -772,7 +772,7 @@ npx prisma migrate dev --name init
 ```
 Expected: Migration created and applied. Tables visible in postgres.
 
-- [ ] **Step 4: Verify tables were created**
+- [x] **Step 4: Verify tables were created**
 
 ```bash
 cd apps/api && npx prisma studio
@@ -780,7 +780,7 @@ cd apps/api && npx prisma studio
 Open http://localhost:5555 — should see all 8 tables.
 Close with Ctrl+C after verifying.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/api/prisma/
@@ -795,7 +795,7 @@ git commit -m "feat(db): prisma schema + initial migration"
 - Create: `apps/api/src/prisma/prisma.service.ts`
 - Create: `apps/api/src/prisma/prisma.module.ts`
 
-- [ ] **Step 1: Write failing test for PrismaService**
+- [x] **Step 1: Write failing test for PrismaService**
 
 ```typescript
 // apps/api/src/prisma/prisma.service.spec.ts
@@ -818,14 +818,14 @@ describe('PrismaService', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to confirm it fails**
+- [x] **Step 2: Run test to confirm it fails**
 
 ```bash
 cd apps/api && npm test -- prisma.service.spec
 ```
 Expected: FAIL — `Cannot find module './prisma.service'`
 
-- [ ] **Step 3: Write PrismaService**
+- [x] **Step 3: Write PrismaService**
 
 ```typescript
 // apps/api/src/prisma/prisma.service.ts
@@ -840,7 +840,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 }
 ```
 
-- [ ] **Step 4: Write PrismaModule**
+- [x] **Step 4: Write PrismaModule**
 
 ```typescript
 // apps/api/src/prisma/prisma.module.ts
@@ -855,14 +855,14 @@ import { PrismaService } from './prisma.service';
 export class PrismaModule {}
 ```
 
-- [ ] **Step 5: Run test to confirm it passes**
+- [x] **Step 5: Run test to confirm it passes**
 
 ```bash
 cd apps/api && npm test -- prisma.service.spec
 ```
 Expected: PASS
 
-- [ ] **Step 6: Add ConfigModule + PrismaModule to AppModule**
+- [x] **Step 6: Add ConfigModule + PrismaModule to AppModule**
 
 ```typescript
 // apps/api/src/app.module.ts
@@ -879,7 +879,7 @@ import { PrismaModule } from './prisma/prisma.module';
 export class AppModule {}
 ```
 
-- [ ] **Step 7: Add /health endpoint to main.ts for K8s readiness probe**
+- [x] **Step 7: Add /health endpoint to main.ts for K8s readiness probe**
 
 ```typescript
 // apps/api/src/health/health.controller.ts
@@ -892,14 +892,14 @@ export class HealthController {
 
 Add `HealthController` to `AppModule`.
 
-- [ ] **Step 8: Run all tests**
+- [x] **Step 8: Run all tests**
 
 ```bash
 cd apps/api && npm test
 ```
 Expected: All tests pass
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add apps/api/src/
@@ -1131,7 +1131,7 @@ git commit -m "feat(db): seed exercises + 12-week workout plan"
 
 ### Task 3.1: Auth DTOs + Service (TDD)
 
-- [ ] **Step 1: Write DTOs**
+- [x] **Step 1: Write DTOs**
 
 ```typescript
 // apps/api/src/auth/dto/register.dto.ts
@@ -1154,7 +1154,7 @@ export class LoginDto {
 }
 ```
 
-- [ ] **Step 2: Write failing tests for AuthService**
+- [x] **Step 2: Write failing tests for AuthService**
 
 ```typescript
 // apps/api/src/auth/auth.service.spec.ts
@@ -1228,14 +1228,14 @@ describe('AuthService', () => {
 });
 ```
 
-- [ ] **Step 3: Run tests to confirm they fail**
+- [x] **Step 3: Run tests to confirm they fail**
 
 ```bash
 cd apps/api && npm test -- auth.service.spec
 ```
 Expected: FAIL — `Cannot find module './auth.service'`
 
-- [ ] **Step 4: Write AuthService**
+- [x] **Step 4: Write AuthService**
 
 ```typescript
 // apps/api/src/auth/auth.service.ts
@@ -1310,7 +1310,7 @@ export class AuthService {
 }
 ```
 
-- [ ] **Step 5: Run tests to confirm they pass**
+- [x] **Step 5: Run tests to confirm they pass**
 
 ```bash
 cd apps/api && npm test -- auth.service.spec
@@ -1321,7 +1321,7 @@ Expected: PASS — 4 tests pass
 
 ### Task 3.2: JWT Strategy + Guard
 
-- [ ] **Step 1: Write JWT strategy**
+- [x] **Step 1: Write JWT strategy**
 
 ```typescript
 // apps/api/src/auth/strategies/jwt.strategy.ts
@@ -1345,7 +1345,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 }
 ```
 
-- [ ] **Step 2: Write JWT guard**
+- [x] **Step 2: Write JWT guard**
 
 ```typescript
 // apps/api/src/auth/guards/jwt-auth.guard.ts
@@ -1356,7 +1356,7 @@ import { AuthGuard } from '@nestjs/passport';
 export class JwtAuthGuard extends AuthGuard('jwt') {}
 ```
 
-- [ ] **Step 3: Write AuthController**
+- [x] **Step 3: Write AuthController**
 
 ```typescript
 // apps/api/src/auth/auth.controller.ts
@@ -1393,7 +1393,7 @@ export class AuthController {
 }
 ```
 
-- [ ] **Step 4: Write AuthModule**
+- [x] **Step 4: Write AuthModule**
 
 ```typescript
 // apps/api/src/auth/auth.module.ts
@@ -1413,7 +1413,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 export class AuthModule {}
 ```
 
-- [ ] **Step 5: Add AuthModule to AppModule**
+- [x] **Step 5: Add AuthModule to AppModule**
 
 ```typescript
 // apps/api/src/app.module.ts
@@ -1434,14 +1434,14 @@ import { HealthController } from './health/health.controller';
 export class AppModule {}
 ```
 
-- [ ] **Step 6: Run all tests**
+- [x] **Step 6: Run all tests**
 
 ```bash
 cd apps/api && npm test
 ```
 Expected: All tests pass
 
-- [ ] **Step 7: Smoke test auth endpoints**
+- [x] **Step 7: Smoke test auth endpoints**
 
 ```bash
 # Start API
@@ -1455,7 +1455,7 @@ curl -X POST http://localhost:4000/auth/register \
 ```
 Expected: `{ "accessToken": "...", "refreshToken": "..." }`
 
-- [ ] **Step 8: Write auth controller integration test**
+- [x] **Step 8: Write auth controller integration test**
 
 ```typescript
 // apps/api/src/auth/auth.controller.spec.ts
@@ -1505,14 +1505,14 @@ describe('AuthController', () => {
 });
 ```
 
-- [ ] **Step 9: Run test to verify it passes**
+- [x] **Step 9: Run test to verify it passes**
 
 ```bash
 cd apps/api && npm test -- --testPathPattern=auth.controller.spec
 ```
 Expected: PASS, 2 tests
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add apps/api/src/auth/ apps/api/src/app.module.ts
@@ -1749,7 +1749,7 @@ git commit -m "feat(api): UsersModule with /me and /me/stats (TDD)"
 
 ### Task 4.1: WorkoutsModule (TDD)
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```typescript
 // apps/api/src/workouts/workouts.service.spec.ts
@@ -1789,13 +1789,13 @@ describe('WorkoutsService', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm failure**
+- [x] **Step 2: Run tests to confirm failure**
 
 ```bash
 cd apps/api && npm test -- workouts.service.spec
 ```
 
-- [ ] **Step 3: Write WorkoutsService**
+- [x] **Step 3: Write WorkoutsService**
 
 ```typescript
 // apps/api/src/workouts/workouts.service.ts
@@ -1844,14 +1844,14 @@ export class WorkoutsService {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd apps/api && npm test -- workouts.service.spec
 ```
 Expected: PASS
 
-- [ ] **Step 5: Write WorkoutsController + WorkoutsModule and add to AppModule**
+- [x] **Step 5: Write WorkoutsController + WorkoutsModule and add to AppModule**
 
 ```typescript
 // apps/api/src/workouts/workouts.controller.ts
@@ -1883,7 +1883,7 @@ import { WorkoutsController } from './workouts.controller';
 export class WorkoutsModule {}
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/workouts/
@@ -1894,7 +1894,7 @@ git commit -m "feat(api): WorkoutsModule (TDD)"
 
 ### Task 4.2: SwimmingModule (TDD)
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```typescript
 // apps/api/src/swimming/swimming.service.spec.ts
@@ -1934,13 +1934,13 @@ describe('SwimmingService', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm failure**
+- [x] **Step 2: Run tests to confirm failure**
 
 ```bash
 cd apps/api && npm test -- swimming.service.spec
 ```
 
-- [ ] **Step 3: Write SwimmingService**
+- [x] **Step 3: Write SwimmingService**
 
 ```typescript
 // apps/api/src/swimming/swimming.service.ts
@@ -1993,13 +1993,13 @@ export class SwimmingService {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd apps/api && npm test -- swimming.service.spec
 ```
 
-- [ ] **Step 5: Write SwimmingController + SwimmingModule and add to AppModule**
+- [x] **Step 5: Write SwimmingController + SwimmingModule and add to AppModule**
 
 ```typescript
 // apps/api/src/swimming/swimming.controller.ts
@@ -2027,7 +2027,7 @@ import { SwimmingController } from './swimming.controller';
 export class SwimmingModule {}
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/swimming/
@@ -2038,7 +2038,7 @@ git commit -m "feat(api): SwimmingModule (TDD)"
 
 ### Task 4.3: MealsModule (TDD) — with meals_with_protein cascade
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```typescript
 // apps/api/src/meals/meals.service.spec.ts
@@ -2080,13 +2080,13 @@ describe('MealsService', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm failure**
+- [x] **Step 2: Run tests to confirm failure**
 
 ```bash
 cd apps/api && npm test -- meals.service.spec
 ```
 
-- [ ] **Step 3: Write MealsService with cascade**
+- [x] **Step 3: Write MealsService with cascade**
 
 ```typescript
 // apps/api/src/meals/meals.service.ts
@@ -2150,14 +2150,14 @@ export class MealsService {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd apps/api && npm test -- meals.service.spec
 ```
 Expected: PASS
 
-- [ ] **Step 5: Write MealsController + MealsModule and add to AppModule**
+- [x] **Step 5: Write MealsController + MealsModule and add to AppModule**
 
 ```typescript
 // apps/api/src/meals/meals.controller.ts
@@ -2186,7 +2186,7 @@ import { MealsController } from './meals.controller';
 export class MealsModule {}
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/meals/
@@ -2197,7 +2197,7 @@ git commit -m "feat(api): MealsModule with meals_with_protein cascade (TDD)"
 
 ### Task 4.4: HabitsModule with score formula (TDD)
 
-- [ ] **Step 1: Write failing tests — score formula is core logic**
+- [x] **Step 1: Write failing tests — score formula is core logic**
 
 ```typescript
 // apps/api/src/habits/habits.service.spec.ts
@@ -2269,13 +2269,13 @@ describe('HabitsService', () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to confirm failure**
+- [x] **Step 2: Run tests to confirm failure**
 
 ```bash
 cd apps/api && npm test -- habits.service.spec
 ```
 
-- [ ] **Step 3: Write HabitsService with score formula**
+- [x] **Step 3: Write HabitsService with score formula**
 
 ```typescript
 // apps/api/src/habits/habits.service.ts
@@ -2342,14 +2342,14 @@ export class HabitsService {
 }
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd apps/api && npm test -- habits.service.spec
 ```
 Expected: PASS — all 4 tests pass
 
-- [ ] **Step 5: Write HabitsController + HabitsModule and add to AppModule**
+- [x] **Step 5: Write HabitsController + HabitsModule and add to AppModule**
 
 ```typescript
 // apps/api/src/habits/habits.controller.ts
@@ -2377,14 +2377,14 @@ import { HabitsController } from './habits.controller';
 export class HabitsModule {}
 ```
 
-- [ ] **Step 6: Run all tests**
+- [x] **Step 6: Run all tests**
 
 ```bash
 cd apps/api && npm test
 ```
 Expected: All tests pass
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add apps/api/src/habits/
@@ -2395,7 +2395,7 @@ git commit -m "feat(api): HabitsModule with server-side score formula (TDD)"
 
 ### Task 4.5: BodyModule + ExercisesModule
 
-- [ ] **Step 1: Write BodyService**
+- [x] **Step 1: Write BodyService**
 
 ```typescript
 // apps/api/src/body/body.service.ts
@@ -2428,7 +2428,7 @@ export class BodyService {
 }
 ```
 
-- [ ] **Step 2: Write ExercisesService**
+- [x] **Step 2: Write ExercisesService**
 
 ```typescript
 // apps/api/src/exercises/exercises.service.ts
@@ -2452,7 +2452,7 @@ export class ExercisesService {
 }
 ```
 
-- [ ] **Step 3: Wire up BodyController, BodyModule, ExercisesController, ExercisesModule — add them all to AppModule**
+- [x] **Step 3: Wire up BodyController, BodyModule, ExercisesController, ExercisesModule — add them all to AppModule**
 
 ```typescript
 // apps/api/src/body/body.controller.ts
@@ -2485,14 +2485,14 @@ export class ExercisesController {
 
 Create `body.module.ts` and `exercises.module.ts` — both follow the same `@Module({ providers, controllers })` pattern. Add both to `AppModule.imports`.
 
-- [ ] **Step 4: Run all tests**
+- [x] **Step 4: Run all tests**
 
 ```bash
 cd apps/api && npm test
 ```
 Expected: All tests pass
 
-- [ ] **Step 5: Smoke test the whole API**
+- [x] **Step 5: Smoke test the whole API**
 
 ```bash
 cd apps/api && npm run start:dev &
@@ -2512,7 +2512,7 @@ curl -s http://localhost:4000/exercises | jq '. | length'
 ```
 Expected: Stats JSON, 7 exercises
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/api/src/body/ apps/api/src/exercises/ apps/api/src/app.module.ts
