@@ -3,7 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Mail, Lock, Eye, EyeOff, Loader2, User, Ruler, Scale, Calendar } from "lucide-react";
-import { createClient } from "@/lib/supabase";
+import { api } from "@/lib/api-client";
+import { tokenStore } from "@/lib/auth";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -28,28 +29,20 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
     try {
-      const supabase = createClient();
+      // Step 1: create account
+      const tokens = await api.auth.register({ email, password, name });
+      tokenStore.setTokens(tokens.accessToken, tokens.refreshToken);
 
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-            age: parseInt(age),
-            height_cm: parseInt(heightCm),
-            weight_kg: parseFloat(weightKg),
-            condition,
-            program_start_date: new Date().toISOString().split("T")[0],
-          },
-        },
+      // Step 2: submit onboarding answers
+      await api.users.onboarding.submit({
+        name,
+        age: parseInt(age),
+        heightCm: parseInt(heightCm),
+        weightKg: parseFloat(weightKg),
+        condition,
       });
 
-      if (signUpError) throw signUpError;
-      if (data.user) {
-        router.push("/dashboard");
-        router.refresh();
-      }
+      router.push("/dashboard");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error al crear cuenta");
     } finally {

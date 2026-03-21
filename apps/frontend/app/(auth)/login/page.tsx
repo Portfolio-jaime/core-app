@@ -3,7 +3,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/supabase";
+import { api } from "@/lib/api-client";
+import { tokenStore } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,11 +19,9 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const tokens = await api.auth.login({ email, password });
+      tokenStore.setTokens(tokens.accessToken, tokens.refreshToken);
       router.push("/dashboard");
-      router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error al iniciar sesión");
     } finally {
