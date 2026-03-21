@@ -1,0 +1,176 @@
+// apps/api/prisma/schema.prisma
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  name             String    @db.VarChar(100)
+  email            String    @unique
+  passwordHash     String
+  heightCm         Int?
+  birthDate        DateTime? @db.Date
+  conditionNotes   String?
+  proteinGoalG     Int       @default(157)
+  waterGoalMl      Int       @default(2000)
+  weightGoalKg     Decimal   @default(95.0) @db.Decimal(5, 1)
+  programStartDate DateTime? @db.Date
+  refreshTokenHash String?
+  createdAt        DateTime  @default(now())
+
+  workoutLogs      WorkoutLog[]
+  swimmingSessions SwimmingSession[]
+  mealLogs         MealLog[]
+  habitLogs        HabitLog[]
+  bodyMeasurements BodyMeasurement[]
+
+  @@map("users")
+}
+
+enum ActivityType {
+  core
+  strength
+  swimming_technique
+  swimming_cardio
+  swimming_easy
+  swimming_long
+  rest
+}
+
+enum MonthPhase {
+  adaptation
+  fat_loss
+  resistance
+}
+
+enum MealType {
+  breakfast
+  snack1
+  lunch
+  snack2
+  dinner
+}
+
+enum DayOfWeek {
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+  sunday
+}
+
+enum ExerciseCategory {
+  core
+  strength
+  swimming
+  mobility
+}
+
+model WorkoutLog {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime     @db.Date
+  type        ActivityType
+  durationMin Int
+  notes       String?
+  completed   Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+
+  @@map("workout_logs")
+}
+
+model SwimmingSession {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime @db.Date
+  totalLaps   Int
+  totalMeters Int
+  durationMin Int
+  poolLengthM Int      @default(25)
+  strokesJson Json
+  avgHrBpm    Int?
+  notes       String?
+
+  @@map("swimming_sessions")
+}
+
+model MealLog {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime @db.Date
+  mealType     MealType
+  description  String
+  proteinG     Decimal  @db.Decimal(5, 1)
+  caloriesKcal Int?
+  isKeto       Boolean  @default(false)
+
+  @@map("meal_logs")
+}
+
+model HabitLog {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date             DateTime @db.Date
+  waterMl          Int      @default(0)
+  mealsWithProtein Int      @default(0)
+  trained          Boolean  @default(false)
+  lowCarbDinner    Boolean  @default(false)
+  sleepHours       Decimal? @db.Decimal(3, 1)
+  mindfulness      Boolean  @default(false)
+  supplementation  Boolean  @default(false)
+  score            Int      @default(0)
+
+  @@unique([userId, date])
+  @@map("habit_logs")
+}
+
+model BodyMeasurement {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          DateTime @db.Date
+  weightKg      Decimal  @db.Decimal(5, 1)
+  waistCm       Decimal? @db.Decimal(5, 1)
+  energyLevel   Int
+  backPainLevel Int
+  notes         String?
+
+  @@map("body_measurements")
+}
+
+model Exercise {
+  id            String  @id @default(uuid())
+  name          String  @unique @db.VarChar(100)
+  description   String
+  instructions  String[]
+  musclesWorked String[]
+  imageUrl      String?
+  safeForL5s1   Boolean @default(true)
+
+  @@map("exercises")
+}
+
+model WorkoutPlan {
+  id           String       @id @default(uuid())
+  weekNumber   Int
+  dayOfWeek    DayOfWeek
+  activityType ActivityType
+  durationMin  Int
+  description  String
+  monthPhase   MonthPhase
+  targetMeters Int?
+
+  @@map("workout_plans")
+}

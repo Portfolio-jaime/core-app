@@ -1,10 +1,47 @@
-# ─── PROD: build standalone image and run locally ────────────────────────────
+# ─── PROD: build standalone images and run locally ──────────────────────────
 # Usage:
 #   Build + run:   docker compose -f docker-compose.prod.yml up --build
 #   Run only:      docker compose -f docker-compose.prod.yml up
-#   Push to Hub:   make push   (or: docker compose -f docker-compose.prod.yml build && docker push jaimehenao8126/healthos-frontend:latest)
+#   Push to Hub:   make release
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: healthos-postgres-prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-healthos}
+      POSTGRES_USER: ${POSTGRES_USER:-healthos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-healthos}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    image: jaimehenao8126/healthos-api:latest
+    container_name: healthos-api-prod
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-healthos}:${POSTGRES_PASSWORD:-changeme}@postgres:5432/${POSTGRES_DB:-healthos}
+      - JWT_SECRET=${JWT_SECRET:-changeme-jwt}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-changeme-refresh}
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - FRONTEND_URL=http://localhost:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
   frontend:
     build:
       context: .
@@ -21,6 +58,9 @@ services:
       - PORT=3001
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+      - NEXT_PUBLIC_API_URL=http://localhost:4000
+    depends_on:
+      - api
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001/"]
@@ -28,3 +68,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+volumes:
+  postgres_prod_data:

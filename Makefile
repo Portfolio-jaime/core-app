@@ -1,11 +1,14 @@
-DOCKER_USER := jaimehenao8126
-IMAGE       := healthos-frontend
-TAG         := latest
-FULL_IMAGE  := $(DOCKER_USER)/$(IMAGE):$(TAG)
+DOCKER_USER   := jaimehenao8126
+FRONTEND_IMG  := healthos-frontend
+API_IMG       := healthos-api
+TAG           := latest
 
-.PHONY: dev dev-build prod build push logs down down-prod clean kind-load
+FULL_FRONTEND := $(DOCKER_USER)/$(FRONTEND_IMG):$(TAG)
+FULL_API      := $(DOCKER_USER)/$(API_IMG):$(TAG)
 
-# ── LOCAL DEV (hot reload) ────────────────────────────────────────────────────
+.PHONY: dev dev-build prod build build-frontend build-api push push-frontend push-api logs down down-prod clean kind-load
+
+# ── LOCAL DEV (hot reload — frontend + api + postgres) ───────────────────────
 dev:
 	docker compose up
 
@@ -15,7 +18,7 @@ dev-build:
 down:
 	docker compose down
 
-# ── PRODUCTION (build standalone image) ──────────────────────────────────────
+# ── PRODUCTION (build standalone images) ────────────────────────────────────
 prod:
 	docker compose -f docker-compose.prod.yml up --build
 
@@ -25,26 +28,36 @@ prod-up:
 down-prod:
 	docker compose -f docker-compose.prod.yml down
 
-build:
-	docker compose -f docker-compose.prod.yml build
+build: build-frontend build-api
 
-# ── DOCKER HUB ────────────────────────────────────────────────────────────────
-push: build
-	docker push $(FULL_IMAGE)
+build-frontend:
+	docker compose -f docker-compose.prod.yml build frontend
 
-# Convenience: build + push in one step
+build-api:
+	docker compose -f docker-compose.prod.yml build api
+
+# ── DOCKER HUB ───────────────────────────────────────────────────────────────
+push: push-frontend push-api
+
+push-frontend: build-frontend
+	docker push $(FULL_FRONTEND)
+
+push-api: build-api
+	docker push $(FULL_API)
+
+# Convenience: build + push everything
 release: build push
-	@echo "✅  $(FULL_IMAGE) pushed to Docker Hub"
+	@echo "✅  $(FULL_FRONTEND) and $(FULL_API) pushed to Docker Hub"
 
-# ── KIND (run after: make push) ───────────────────────────────────────────────
-# Load the local image into a running Kind cluster (skips Docker Hub pull)
+# ── KIND (run after: make push) ──────────────────────────────────────────────
 kind-load:
-	kind load docker-image $(FULL_IMAGE)
+	kind load docker-image $(FULL_FRONTEND)
+	kind load docker-image $(FULL_API)
 
-# ── MAINTENANCE ───────────────────────────────────────────────────────────────
+# ── MAINTENANCE ──────────────────────────────────────────────────────────────
 logs:
 	docker compose logs -f
 
 clean:
 	docker compose down -v --remove-orphans
-	docker image rm -f $(FULL_IMAGE) 2>/dev/null || true
+	docker image rm -f $(FULL_FRONTEND) $(FULL_API) 2>/dev/null || true
