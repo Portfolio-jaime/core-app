@@ -215,12 +215,59 @@ cd ~/arheanja/core-app/dev-cluster && make apps-status
 Añadir una sola vez:
 
 ```bash
-# HealthOS
-echo "127.0.0.1  healthos.local api.healthos.local" | sudo tee -a /etc/hosts
+# HealthOS + ArgoCD
+echo "127.0.0.1  healthos.local api.healthos.local argocd.local" | sudo tee -a /etc/hosts
 
 # bills-app (cuando esté lista)
 echo "127.0.0.1  bills.local api.bills.local" | sudo tee -a /etc/hosts
 ```
+
+---
+
+## ArgoCD
+
+### `make argocd-install`
+
+Instala ArgoCD completo en el cluster con ingress y acceso vía `http://argocd.local`.
+
+```bash
+make argocd-install
+```
+
+**Qué hace:**
+1. Crea namespace `argocd`
+2. Instala ArgoCD con `--server-side` (evita límite de tamaño en CRDs)
+3. Espera a que `argocd-server` esté `Available`
+4. Configura modo `insecure` (nginx maneja TLS)
+5. Aplica `k8s/argocd/application.yaml` — conecta ArgoCD al repo
+6. Aplica `k8s/argocd/ingress.yaml` — expone en `http://argocd.local`
+7. Imprime la contraseña inicial
+
+**Tiempo estimado:** ~2–3 minutos
+
+### `make argocd-status`
+
+```bash
+make argocd-status
+# Muestra pods en namespace argocd + Applications registradas
+```
+
+### `make argocd-open`
+
+```bash
+make argocd-open
+# Imprime URL y contraseña admin — no necesita port-forward
+```
+
+**Acceso:**
+
+| Campo | Valor |
+|-------|-------|
+| URL | `http://argocd.local` |
+| Usuario | `admin` |
+| Contraseña | (se imprime al instalar, o con `make argocd-open`) |
+
+> ⚠️ Cambia la contraseña tras el primer login: **User Info → Update Password**
 
 ---
 
