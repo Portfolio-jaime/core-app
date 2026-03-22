@@ -38,18 +38,23 @@ argocd-install:
 	kubectl wait --namespace argocd \
 	  --for=condition=available deployment/argocd-server \
 	  --timeout=180s
-	@echo "📋 Applying HealthOS ArgoCD Application..."
+	@echo "� Setting insecure mode (nginx ingress termination)..."
+	kubectl patch configmap argocd-cmd-params-cm -n argocd \
+	  --type merge -p '{"data":{"server.insecure":"true"}}'
+	kubectl rollout restart deployment/argocd-server -n argocd
+	kubectl rollout status deployment/argocd-server -n argocd --timeout=60s
+	@echo "📋 Applying HealthOS ArgoCD Application + Ingress..."
 	kubectl apply -f ../k8s/argocd/application.yaml
-	@echo "✅ ArgoCD installed — run: make argocd-open"
+	kubectl apply -f ../k8s/argocd/ingress.yaml
+	@echo "✅ ArgoCD ready at http://argocd.local  (user: admin)"
+	@echo "🔑 Password:"; kubectl -n argocd get secret argocd-initial-admin-secret \
+	  -o jsonpath="{.data.password}" | base64 -d && echo ""
 
 argocd-status:
 	@echo "\n=== ArgoCD Pods ===" && kubectl get pods -n argocd
 	@echo "\n=== ArgoCD Applications ===" && kubectl get applications -n argocd 2>/dev/null || echo "(no applications)"
 
 argocd-open:
-	@echo "🔑 ArgoCD admin password:"
-	@kubectl -n argocd get secret argocd-initial-admin-secret \
+	@echo "🌐 ArgoCD UI: http://argocd.local  (user: admin)"
+	@echo "🔑 Password:"; kubectl -n argocd get secret argocd-initial-admin-secret \
 	  -o jsonpath="{.data.password}" | base64 -d && echo ""
-	@echo "\n🌐 Opening ArgoCD UI via port-forward..."
-	@echo "   URL: http://localhost:8080 (user: admin)"
-	kubectl port-forward svc/argocd-server -n argocd 8080:443
