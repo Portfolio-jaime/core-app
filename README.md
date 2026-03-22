@@ -8,9 +8,14 @@
 
 | Capa | Estado | Tecnología |
 |------|--------|-----------|
-| Frontend | ✅ En producción (Docker) | Next.js 15, Tailwind, Recharts |
-| API | 🚧 En desarrollo | NestJS, Prisma, PostgreSQL |
-| Infraestructura | 🚧 En desarrollo | Kind, nginx Ingress, ArgoCD |
+| Frontend | ✅ Running en Kind | Next.js 15, Tailwind, Recharts |
+| API | ✅ Running en Kind | NestJS, Prisma, PostgreSQL |
+| Base de datos | ✅ Running en Kind | PostgreSQL 16, migraciones aplicadas |
+| Infraestructura | ✅ Operativo | Kind `local-dev`, nginx Ingress, ArgoCD manifest |
+
+**URLs locales:**
+- `http://healthos.local` — Frontend
+- `http://api.healthos.local/health` — API health check
 
 ---
 
@@ -26,7 +31,9 @@
 | Gráficos | Recharts |
 | Contenedores | Docker multi-stage, Docker Compose |
 | Registro | Docker Hub – `jaimehenao8126` |
-| Clúster | Kind + nginx Ingress + ArgoCD |
+| Clúster local | Kind `local-dev` — compartido con bills-app |
+| Ingress | nginx Ingress Controller |
+| GitOps | ArgoCD (manifest en `k8s/argocd/`)  |
 
 ---
 
@@ -35,23 +42,26 @@
 ```
 core-app/
 ├── apps/
-│   ├── frontend/               # Next.js 15 (App Router)
+│   ├── frontend/               # Next.js 15 (App Router, puerto 3001)
 │   │   ├── app/                # Páginas: dashboard, 7 módulos, auth
 │   │   ├── components/         # navigation.tsx, ui/
 │   │   ├── lib/                # data.ts, store.ts, utils.ts
 │   │   ├── types/              # Tipos TypeScript
-│   │   ├── next.config.js      # output:standalone + outputFileTracingRoot
-│   │   └── package.json
-│   └── api/                    # NestJS (WIP)
-│       └── ...
-├── k8s/                        # Manifests Kubernetes (WIP → k8s/base/)
+│   │   └── next.config.js      # output:standalone
+│   └── api/                    # NestJS (puerto 4000)
+│       ├── src/                # Controllers, services, modules
+│       └── prisma/             # Schema, migraciones, seed
+├── k8s/
+│   ├── base/                   # Manifests: namespace, secrets, configmap,
+│   │   │                       # postgres, api, frontend, ingress
+│   └── argocd/                 # application.yaml para GitOps
 ├── docs/
 │   └── superpowers/plans/      # Plan de implementación
-├── Dockerfile                  # Multi-stage: deps → builder → runner
-├── docker-compose.yml          # Dev: hot reload (node:20-alpine + bind mount)
-├── docker-compose.prod.yml     # Prod: imagen jaimehenao8126/healthos-frontend
-├── Makefile                    # Comandos clave
-├── .env.example                # Template de variables de entorno
+├── Dockerfile                  # Frontend multi-stage
+├── Dockerfile.api              # API multi-stage (NestJS + Prisma)
+├── docker-compose.yml          # Dev: hot reload
+├── docker-compose.prod.yml     # Prod: imágenes standalone
+├── Makefile                    # Comandos dev + k8s
 └── package.json                # npm workspaces root
 ```
 
@@ -97,18 +107,62 @@ make release   # build + push jaimehenao8126/healthos-frontend:latest
 
 ## Comandos Makefile
 
+### Desarrollo local
 | Comando | Descripción |
 |---------|------------|
 | `make dev` | Dev con hot reload |
 | `make prod` | Build + run imagen producción |
-| `make build` | Solo construye la imagen |
-| `make push` | Sube imagen a Docker Hub |
+| `make build` | Construye frontend + api |
+| `make push` | Sube imágenes a Docker Hub |
 | `make release` | Build + push en un paso |
 | `make logs` | Tail de logs del contenedor dev |
 | `make down` | Para contenedores dev |
-| `make down-prod` | Para contenedores prod |
 | `make clean` | Para y elimina volúmenes e imagen |
-| `make kind-load` | Carga imagen en clúster Kind |
+
+### Kubernetes (cluster `local-dev`)
+> El cluster se gestiona desde `~/arheanja/dev-cluster/` — ver abajo.
+
+| Comando | Descripción |
+|---------|------------|
+| `make k8s-load` | Carga imágenes en el nodo Kind |
+| `make k8s-apply` | Aplica todos los manifests del namespace `healthos` |
+| `make k8s-deploy` | Load + apply (deploy completo) |
+| `make k8s-migrate` | Prisma migrate deploy + db seed |
+| `make k8s-status` | Estado de pods, services e ingress |
+| `make k8s-restart` | Rollout restart de api y frontend |
+
+---
+
+## Cluster compartido `local-dev`
+
+El cluster Kind es compartido entre `core-app` (healthos) y `bills-app`. Se gestiona desde:
+
+```
+~/arheanja/dev-cluster/
+├── kind-cluster.yaml   # Cluster local-dev, control-plane, ports 80/443
+└── Makefile            # cluster-up / cluster-down / apps-status
+```
+
+### Levantar todo desde cero
+
+```bash
+# 1. Cluster (una sola vez)
+cd ~/arheanja/dev-cluster && make cluster-up
+
+# 2. Deploy de HealthOS
+cd ~/arheanja/core-app && make k8s-deploy
+
+# 3. Migraciones (primera vez)
+make k8s-migrate
+
+# 4. /etc/hosts (una sola vez)
+echo "127.0.0.1  healthos.local api.healthos.local" | sudo tee -a /etc/hosts
+```
+
+### Ver estado de todas las apps
+```bash
+cd ~/arheanja/dev-cluster && make apps-status
+```
 
 ---
 
