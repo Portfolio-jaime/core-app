@@ -93,8 +93,8 @@ kind-full: k8s-deploy
 kind-migrate: k8s-migrate
 kind-status: k8s-status
 kind-down:
-	@echo "⚠️  Use: make -C ../dev-cluster cluster-down"
-	@make -C ../dev-cluster cluster-down
+	@echo "⚠️  Use: make -C dev-cluster cluster-down"
+	@make -C dev-cluster cluster-down
 
 # ── MAINTENANCE ──────────────────────────────────────────────────────────────
 logs:

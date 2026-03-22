@@ -135,19 +135,20 @@ make release   # build + push jaimehenao8126/healthos-frontend:latest
 
 ## Cluster compartido `local-dev`
 
-El cluster Kind es compartido entre `core-app` (healthos) y `bills-app`. Se gestiona desde:
+El cluster Kind es compartido entre `core-app` (healthos) y `bills-app`. Se gestiona desde `core-app/dev-cluster/`:
 
 ```
-~/arheanja/dev-cluster/
-├── kind-cluster.yaml   # Cluster local-dev, control-plane, ports 80/443
-└── Makefile            # cluster-up / cluster-down / apps-status
+core-app/dev-cluster/
+├── kind-cluster.yaml     # Cluster local-dev, control-plane, ports 80/443
+├── Makefile              # cluster-up / cluster-down / apps-status
+└── MAKEFILE_GUIDE.md     # Guía completa con diagramas de arquitectura
 ```
 
 ### Levantar todo desde cero
 
 ```bash
 # 1. Cluster (una sola vez)
-cd ~/arheanja/dev-cluster && make cluster-up
+cd ~/arheanja/core-app/dev-cluster && make cluster-up
 
 # 2. Deploy de HealthOS
 cd ~/arheanja/core-app && make k8s-deploy
