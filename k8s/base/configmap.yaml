@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: healthos-config
+  namespace: healthos
+data:
+  NODE_ENV: "production"
+  PORT: "4000"
+  JWT_EXPIRES_IN: "15m"
+  JWT_REFRESH_EXPIRES_IN: "7d"
+  FRONTEND_URL: "http://healthos.local"
+  # DATABASE_URL is intentionally absent — it contains the password and lives in healthos-secrets
