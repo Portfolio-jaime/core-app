@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: jaimehenao8126/healthos-api:aa60ab3b549e9a4b984726a11268d8fe9dc915b6
+          image: jaimehenao8126/healthos-api:2e83a8613e665d0ebb569e7a77a6d9e4fb052c01
           imagePullPolicy: Always
           ports:
             - containerPort: 4000
