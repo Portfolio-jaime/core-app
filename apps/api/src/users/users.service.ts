@@ -31,25 +31,38 @@ export class UsersService {
   }
 
   async onboard(userId: string, dto: {
+    name?: string;
     heightCm?: number;
+    age?: number;
     birthDate?: string;
+    weightKg?: number;
     currentWeightKg?: number;
     weightGoalKg?: number;
     waterGoalMl?: number;
     proteinGoalG?: number;
+    condition?: string;
     conditionNotes?: string;
-    programStartDate: string;
+    programStartDate?: string;
   }) {
-    const { currentWeightKg, birthDate, programStartDate, ...profileFields } = dto;
+    // Normalize field aliases from frontend
+    const currentWeightKg = dto.currentWeightKg ?? dto.weightKg;
+    const conditionNotes = dto.conditionNotes ?? dto.condition;
 
     // Auto-calculate protein goal: bodyWeight × 1.6 (standard lean-mass protocol)
     const proteinGoalG = dto.proteinGoalG ?? (currentWeightKg ? Math.round(currentWeightKg * 1.6) : undefined);
 
+    // programStartDate defaults to today if not provided
+    const startDate = dto.programStartDate ? new Date(dto.programStartDate) : new Date();
+
     const updateData: any = {
-      ...profileFields,
-      programStartDate: new Date(programStartDate),
-      ...(birthDate && { birthDate: new Date(birthDate) }),
+      ...(dto.name && { name: dto.name }),
+      ...(dto.heightCm && { heightCm: dto.heightCm }),
+      ...(conditionNotes && { conditionNotes }),
+      ...(dto.weightGoalKg && { weightGoalKg: dto.weightGoalKg }),
+      ...(dto.waterGoalMl && { waterGoalMl: dto.waterGoalMl }),
       ...(proteinGoalG !== undefined && { proteinGoalG }),
+      programStartDate: startDate,
+      ...(dto.birthDate && { birthDate: new Date(dto.birthDate) }),
     };
 
     const user = await this.prisma.user.update({
@@ -62,10 +75,10 @@ export class UsersService {
       await this.prisma.bodyMeasurement.create({
         data: {
           userId,
-          date: new Date(programStartDate),
+          date: startDate,
           weightKg: currentWeightKg,
-          energyLevel: 5,  // neutral default
-          backPainLevel: 0, // no pain default
+          energyLevel: 5,
+          backPainLevel: 0,
         },
       });
     }
