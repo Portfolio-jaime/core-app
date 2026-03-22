@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: jaimehenao8126/healthos-frontend:2e83a8613e665d0ebb569e7a77a6d9e4fb052c01
+          image: jaimehenao8126/healthos-frontend:9d45cbcb61294fd730d6b0d6c2f587e54d00a519
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
