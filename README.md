@@ -14,8 +14,92 @@
 | Infraestructura | ✅ Operativo | Kind `local-dev`, nginx Ingress, ArgoCD manifest |
 
 **URLs locales:**
-- `http://healthos.local` — Frontend
-- `http://api.healthos.local/health` — API health check
+
+| URL | Descripción |
+|-----|-------------|
+| `http://healthos.local` | Frontend Next.js |
+| `http://api.healthos.local` | API NestJS |
+| `http://api.healthos.local/health` | Health check |
+| `http://argocd.local` | ArgoCD GitOps UI (user: admin) |
+
+---
+
+## Arquitectura
+
+### Sistema completo
+
+```mermaid
+graph TB
+    subgraph DEV["💻 Desarrollo local"]
+        CODE["Código fuente
+docker compose up"]
+        MAKE["Makefile
+make dev / make release"]
+    end
+
+    subgraph CICD["🔄 CI/CD — GitHub Actions"]
+        direction LR
+        TEST["1. test-api
+npm test"]
+        BUILD["2. build + push\nDocker Hub\namd64 + arm64"]
+        GITOPS["3. update-manifests\nsed image tag\ngit push [skip ci]"]
+        TEST --> BUILD --> GITOPS
+    end
+
+    subgraph HUB["🐳 Docker Hub"]
+        IMG_API["healthos-api:\nsha256..."]
+        IMG_FE["healthos-frontend:\nsha256..."]
+    end
+
+    subgraph CLUSTER["☸️ Kind Cluster: local-dev"]
+        subgraph ARGOCD_NS["namespace: argocd"]
+            ARGOCD["ArgoCD\nhttp://argocd.local"]
+        end
+
+        subgraph NGINX_NS["namespace: ingress-nginx"]
+            NGINX["nginx Ingress\nController\n:80"]
+        end
+
+        subgraph HEALTHOS_NS["namespace: healthos"]
+            FE["frontend\nNext.js :3001"]
+            API["api\nNestJS :4000"]
+            DB[("postgres\nPostgreSQL 16")]
+        end
+
+        ARGOCD -->|"watch k8s/base/"| HEALTHOS_NS
+        NGINX -->|"healthos.local"| FE
+        NGINX -->|"api.healthos.local"| API
+        NGINX -->|"argocd.local"| ARGOCD
+        API --> DB
+    end
+
+    CODE -->|"git push → main"| CICD
+    BUILD --> HUB
+    GITOPS -->|"manifest updated"| ARGOCD
+    HUB -->|"kind load / pull"| CLUSTER
+```
+
+### Flujo CI/CD detallado
+
+```mermaid
+sequenceDiagram
+    participant Dev as 💻 Dev
+    participant GH as GitHub
+    participant CI as ⚙️ GitHub Actions
+    participant DH as 🐳 Docker Hub
+    participant Argo as 🔄 ArgoCD
+    participant K8s as ☸️ Cluster
+
+    Dev->>GH: git push → main
+    GH->>CI: trigger workflow
+    CI->>CI: npm test (api)
+    CI->>DH: docker push healthos-*:SHA
+    CI->>GH: sed image tag en k8s/base/
+    CI->>GH: git commit [skip ci]
+    GH-->>Argo: detects manifest change
+    Argo->>K8s: kubectl apply k8s/base/
+    K8s-->>Dev: pods rolling update ✅
+```
 
 ---
 
@@ -140,29 +224,32 @@ El cluster Kind es compartido entre `core-app` (healthos) y `bills-app`. Se gest
 ```
 core-app/dev-cluster/
 ├── kind-cluster.yaml     # Cluster local-dev, control-plane, ports 80/443
-├── Makefile              # cluster-up / cluster-down / apps-status
+├── Makefile              # cluster-up / cluster-down / argocd-install / apps-status
 └── MAKEFILE_GUIDE.md     # Guía completa con diagramas de arquitectura
 ```
 
 ### Levantar todo desde cero
 
 ```bash
-# 1. Cluster (una sola vez)
+# 1. Cluster + nginx ingress
 cd ~/arheanja/core-app/dev-cluster && make cluster-up
 
 # 2. Deploy de HealthOS
 cd ~/arheanja/core-app && make k8s-deploy
 
-# 3. Migraciones (primera vez)
+# 3. Migraciones + seed (primera vez)
 make k8s-migrate
 
-# 4. /etc/hosts (una sola vez)
-echo "127.0.0.1  healthos.local api.healthos.local" | sudo tee -a /etc/hosts
+# 4. ArgoCD (GitOps)
+cd ~/arheanja/core-app/dev-cluster && make argocd-install
+
+# 5. /etc/hosts (una sola vez)
+echo "127.0.0.1  healthos.local api.healthos.local argocd.local" | sudo tee -a /etc/hosts
 ```
 
 ### Ver estado de todas las apps
 ```bash
-cd ~/arheanja/dev-cluster && make apps-status
+cd ~/arheanja/core-app/dev-cluster && make apps-status
 ```
 
 ---
