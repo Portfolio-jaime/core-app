@@ -1,6 +1,8 @@
 import { tokenStore } from "./auth";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+// All requests go through Next.js rewrite proxy (/api/* → internal API).
+// This avoids CORS and removes the need for a build-time baked URL.
+const BASE = "/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
