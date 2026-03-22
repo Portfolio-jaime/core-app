@@ -24,6 +24,11 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    /*
+     * Match all paths EXCEPT:
+     * - _next/static, _next/image, favicon, static files
+     * - /api/* (Next.js rewrite proxy to backend — handled by next.config.js rewrites)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
